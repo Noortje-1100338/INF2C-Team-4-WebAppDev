@@ -239,22 +239,52 @@ function QuestOverview({
   onCancelQuest,
   onTransfer,
 }: QuestOverviewProps) {
+  const [questFilter, setQuestFilter] = useState<"all" | "mine">("all");
   const today = getLocalToday();
+  const visibleQuests =
+    questFilter === "mine"
+      ? quests.filter((quest) => quest.leaderId === currentMember.id)
+      : quests;
 
   return (
     <section className="quest-overview" aria-labelledby="quest-overview-title">
       <div className="quest-overview-heading">
         <div>
           <p className="modal-eyebrow">Quest board</p>
-          <h2 id="quest-overview-title">Beschikbare quests</h2>
+          <h2 id="quest-overview-title">
+            {questFilter === "mine" ? "Mijn quests" : "Alle quests"}
+          </h2>
         </div>
       </div>
 
-      {quests.length === 0 ? (
-        <p className="quest-empty">Er zijn nog geen quests geplaatst.</p>
+      <div className="quest-filters" aria-label="Filter quests">
+        <Button
+          size="small"
+          variant={questFilter === "all" ? "primary" : "secondary"}
+          aria-pressed={questFilter === "all"}
+          onClick={() => setQuestFilter("all")}
+        >
+          Alle quests
+        </Button>
+        <Button
+          size="small"
+          variant={questFilter === "mine" ? "primary" : "secondary"}
+          aria-pressed={questFilter === "mine"}
+          onClick={() => setQuestFilter("mine")}
+        >
+          Mijn quests
+        </Button>
+      </div>
+
+      {visibleQuests.length === 0 ? (
+        <p className="quest-empty">
+          {questFilter === "mine"
+            ? "Je hebt nog geen quests geplaatst."
+            : "Er zijn nog geen quests geplaatst."}
+        </p>
       ) : (
         <div className="quest-grid">
-          {quests.map((quest) => (
+          {visibleQuests.map((quest) => (
             <QuestCard
               key={quest.id}
               quest={quest}

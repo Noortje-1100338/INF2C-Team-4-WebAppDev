@@ -14,6 +14,7 @@ import {
 } from "../services/questRepository";
 import "./questPage.css";
 
+// Geef datum als YYYY-MM-DD
 function getLocalToday(): string {
   const today = new Date();
   const year = today.getFullYear();
@@ -172,6 +173,7 @@ function QuestPage() {
     openModal();
   }
 
+  // Aanvraag plek quest
   function requestPlace(questId: string): void {
     const quest = quests.find((item) => item.id === questId);
     if (!quest) {
@@ -211,6 +213,7 @@ function QuestPage() {
     );
   }
 
+  // Goedkeuren van een aanvraag, controleer rechten en plekken
   function confirmRequest(questId: string, requestId: string): void {
     const quest = quests.find((item) => item.id === questId);
     const request = quest?.requests.find((item) => item.id === requestId);
@@ -280,6 +283,7 @@ function QuestPage() {
     saveQuestChange(quest.id, updatedQuest, "De quest is geannuleerd.");
   }
 
+  // Leiderschap overdragen
   function transferLeadership(questId: string, newLeaderId: string): void {
     const quest = quests.find((item) => item.id === questId);
     if (!quest || quest.leaderId !== activeMember.id || quest.cancelled) {
@@ -295,9 +299,7 @@ function QuestPage() {
       return;
     }
 
-    const newLeader = questMembers.find(
-      (member) => member.id === newLeaderId,
-    );
+    const newLeader = questMembers.find((member) => member.id === newLeaderId);
     if (!newLeader) {
       setNotice("Dit lid kon niet worden gevonden.");
       return;
