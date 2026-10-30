@@ -1,0 +1,121 @@
+.report-form {
+    width: 100%;
+    max-width: none;
+    max-height: calc(100vh - 4rem);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding: 0;
+    margin: 0;
+    background: transparent;
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+    box-sizing: border-box;
+}
+
+
+.report-form .form-group {
+   margin-bottom: 1.25rem;
+}
+
+.report-form label {
+    color: var(--color-text);
+    font-family: 'Jetbrains Mono', monospace;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.report-form .form-group > label {
+    display: block;
+    margin-bottom: 0.45rem;
+}
+
+.report-form input[type="text"],
+.report-form input[type="date"],
+.report-form textarea {
+    width: 100%;
+    padding: 0.75rem 0.85rem;
+    background-color: var(--color-bg);
+    color: var(--color-text);
+    border: 1px solid var(--color-border);
+    border-radius: 4px;
+    font-family: 'Spectral', serif;
+    font-size: 1rem;
+    box-sizing: border-box;
+}
+
+.report-form input[type="text"]:focus,
+.report-form input[type="date"]:focus,
+.report-form textarea:focus {
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 2px rgba(138, 59, 44, 0.12);
+    outline: none
+}
+
+.report-form textarea {
+    min-height: 150px;
+    resize: vertical;
+}
+
+.modal-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.75rem;
+    margin-top: 1.75rem;
+}
+
+.encounter-section {
+    margin-top: 1.5rem;
+}
+
+.encounters-header {
+    margin-bottom: 1rem;
+}
+
+.encounters-header h3,
+.encounters-header h4 {
+    margin-bottom: 0;
+
+}
+
+.encounter-form-card {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    background-color: var(--color-bg-subtle);
+    border: 1px solid var(--color-border);
+    border-radius: 6px;
+}
+
+.encounter-form-card .form-group {
+    margin-bottom: 0;
+}
+
+.add-encounter-button {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.85rem;
+    width: fit-content;
+}
+
+@media (max-width: 480px) {
+    .encounters-header,
+    .encounters-card-header {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+}
+
+@media (max-width: 600px) {
+    .report-form {
+        max-height: calc(100vh - 1.5rem);
+        padding: 1.25rem;
+    }
+
+    .modal-actions {
+        flex-direction: row;
+        align-items: stretch;
+    }
+}
