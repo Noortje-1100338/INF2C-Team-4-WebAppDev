@@ -29,11 +29,22 @@ interface QuestCardProps {
   onTransfer: (questId: string, memberId: string) => void;
 }
 
+type QuestOwnerFilter = "all" | "mine";
+type TypeFilter = "all" | "dangerous" | "regular" | "cancelled";
+
 function getCreature(creatureId: string | null) {
   return questCreatures.find((creature) => creature.id === creatureId);
 }
 
-function getLocalToday(): string {
+function matchesType(quest: Quest, filter: TypeFilter): boolean {
+  if (filter === "all") return true;
+  if (filter === "cancelled") return quest.cancelled;
+  if (quest.cancelled) return false;
+  const isDangerous = Boolean(getCreature(quest.creatureId)?.dangerous);
+  return filter === "dangerous" ? isDangerous : !isDangerous;
+}
+
+function getToday(): string {
   const today = new Date();
   const year = today.getFullYear();
   const month = String(today.getMonth() + 1).padStart(2, "0");
@@ -68,11 +79,17 @@ function QuestCard({
   onCancelQuest,
   onTransfer,
 }: QuestCardProps) {
-  const [transferTarget, setTransferTarget] = useState("");
+  const [newLeaderId, setNewLeaderId] = useState("");
   const leader = questMembers.find((member) => member.id === quest.leaderId);
   const creature = getCreature(quest.creatureId);
   const confirmedRequests = quest.requests.filter(
     (request) => request.confirmed,
+  );
+  const usedPlaces = confirmedRequests.length + 1;
+  const freePlaces = Math.max(quest.partySize - usedPlaces, 0);
+  const partyFill = Math.min(
+    (usedPlaces / quest.partySize) * 100,
+    100,
   );
   const currentRequest = quest.requests.find(
     (request) => request.memberId === currentMember.id,
@@ -91,12 +108,12 @@ function QuestCard({
   const returnDate = new Date(departure);
   returnDate.setDate(returnDate.getDate() + quest.durationDays);
 
-  function handleTransfer(): void {
-    if (!transferTarget) {
+  function transferLeader(): void {
+    if (!newLeaderId) {
       return;
     }
-    onTransfer(quest.id, transferTarget);
-    setTransferTarget("");
+    onTransfer(quest.id, newLeaderId);
+    setNewLeaderId("");
   }
 
   return (
@@ -109,27 +126,54 @@ function QuestCard({
           <span className="quest-status cancelled">Geannuleerd</span>
         )}
       </div>
-      <p>{quest.areaDescription}</p>
+      <p className="quest-description">{quest.areaDescription}</p>
       {creature && (
-        <p>
+        <p
+          className={`quest-creature${creature.dangerous ? " dangerous" : ""}`}
+        >
           Wezen: {creature.name} ({creature.region})
           {creature.dangerous && " - Gevaarlijk"}
         </p>
       )}
-      <p>Vertrek: {formatDate(departure)}</p>
-      <p>
-        Verwachte terugkomst: {formatDate(returnDate)} ({quest.durationDays}{" "}
-        dagen)
-      </p>
-      <p>
-        Plekken: {confirmedRequests.length + 1} van {quest.partySize} bezet
-      </p>
+      <div className="quest-dates">
+        <p>
+          <span>Vertrek</span>
+          <strong>{formatDate(departure)}</strong>
+        </p>
+        <p>
+          <span>Terug verwacht</span>
+          <strong>
+            {formatDate(returnDate)} · {quest.durationDays} dagen
+          </strong>
+        </p>
+      </div>
+      <div className="quest-party">
+        <p>
+          Plekken: {usedPlaces} van {quest.partySize} bezet
+        </p>
+        <div
+          className="quest-party-progress"
+          role="progressbar"
+          aria-label="Bezetting van de questpartij"
+          aria-valuemin={0}
+          aria-valuemax={quest.partySize}
+          aria-valuenow={usedPlaces}
+        >
+          <span style={{ width: `${partyFill}%` }} />
+        </div>
+        <p className="quest-party-message">
+          {freePlaces > 0
+            ? `Nog ${freePlaces} ${freePlaces === 1 ? "plek" : "plekken"} vrij`
+            : "Partij compleet!"}
+        </p>
+      </div>
       <p>
         Leider: {leader?.name ?? "Onbekend"}
         {leader?.trained ? " (getraind)" : ""}
       </p>
-      <p>
-        Status:{" "}
+      <p
+        className={`quest-type${quest.cancelled ? " cancelled" : creature?.dangerous ? " dangerous" : ""}`}
+      >
         {quest.cancelled
           ? "Geannuleerd"
           : creature?.dangerous
@@ -204,8 +248,8 @@ function QuestCard({
               <div>
                 <select
                   id={`transfer-${quest.id}`}
-                  value={transferTarget}
-                  onChange={(event) => setTransferTarget(event.target.value)}
+                  value={newLeaderId}
+                  onChange={(event) => setNewLeaderId(event.target.value)}
                 >
                   <option value="">Kies een bevestigd lid</option>
                   {availableMembers.map((member) => (
@@ -216,8 +260,8 @@ function QuestCard({
                 </select>
                 <Button
                   size="small"
-                  disabled={!transferTarget}
-                  onClick={handleTransfer}
+                  disabled={!newLeaderId}
+                  onClick={transferLeader}
                 >
                   Overdragen
                 </Button>
@@ -239,12 +283,17 @@ function QuestOverview({
   onCancelQuest,
   onTransfer,
 }: QuestOverviewProps) {
-  const [questFilter, setQuestFilter] = useState<"all" | "mine">("all");
-  const today = getLocalToday();
-  const visibleQuests =
-    questFilter === "mine"
-      ? quests.filter((quest) => quest.leaderId === currentMember.id)
-      : quests;
+  const [questFilter, setQuestFilter] = useState<QuestOwnerFilter>("all");
+  const [typeFilter, setTypeFilter] = useState<TypeFilter>("all");
+  const today = getToday();
+  const myQuests = quests.filter(
+    (quest) => quest.leaderId === currentMember.id,
+  );
+  const visibleQuests = quests.filter(
+    (quest) =>
+      (questFilter === "all" || quest.leaderId === currentMember.id) &&
+      matchesType(quest, typeFilter),
+  );
 
   return (
     <section className="quest-overview" aria-labelledby="quest-overview-title">
@@ -257,30 +306,56 @@ function QuestOverview({
         </div>
       </div>
 
-      <div className="quest-filters" aria-label="Filter quests">
-        <Button
-          size="small"
-          variant={questFilter === "all" ? "primary" : "secondary"}
-          aria-pressed={questFilter === "all"}
-          onClick={() => setQuestFilter("all")}
-        >
-          Alle quests
-        </Button>
-        <Button
-          size="small"
-          variant={questFilter === "mine" ? "primary" : "secondary"}
-          aria-pressed={questFilter === "mine"}
-          onClick={() => setQuestFilter("mine")}
-        >
-          Mijn quests
-        </Button>
+      <div className="quest-filters">
+        <div className="quest-filter-group" role="group" aria-label="Wie plaatste de quest">
+          <span className="quest-filter-label">Van</span>
+          <Button
+            size="small"
+            className="quest-filter"
+            variant={questFilter === "all" ? "primary" : "secondary"}
+            aria-pressed={questFilter === "all"}
+            onClick={() => setQuestFilter("all")}
+          >
+            Iedereen <span>{quests.length}</span>
+          </Button>
+          <Button
+            size="small"
+            className="quest-filter"
+            variant={questFilter === "mine" ? "primary" : "secondary"}
+            aria-pressed={questFilter === "mine"}
+            onClick={() => setQuestFilter("mine")}
+          >
+            Mijn quests <span>{myQuests.length}</span>
+          </Button>
+        </div>
+        <div className="quest-filter-group" role="group" aria-label="Questsoort">
+          {(
+            [
+              ["all", "Alle"],
+              ["dangerous", "Gevaarlijk"],
+              ["regular", "Regulier"],
+              ["cancelled", "Geannuleerd"],
+            ] as const
+          ).map(([filter, label]) => (
+            <Button
+              key={filter}
+              size="small"
+              className="quest-filter"
+              variant={typeFilter === filter ? "primary" : "secondary"}
+              aria-pressed={typeFilter === filter}
+              onClick={() => setTypeFilter(filter)}
+            >
+              {label}
+            </Button>
+          ))}
+        </div>
       </div>
 
       {visibleQuests.length === 0 ? (
         <p className="quest-empty">
-          {questFilter === "mine"
+          {questFilter === "mine" && typeFilter === "all"
             ? "Je hebt nog geen quests geplaatst."
-            : "Er zijn nog geen quests geplaatst."}
+            : "Geen quests gevonden met deze filters."}
         </p>
       ) : (
         <div className="quest-grid">
