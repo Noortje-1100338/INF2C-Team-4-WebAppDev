@@ -2,7 +2,7 @@ namespace Hollowmere.Api.Models;
 
 public class GearItem : IEntity
 {
-    public string Id { get; set; } = string.Empty;
+    public int Id { get; set; }
     public string Name { get; set; } = string.Empty;
     public string Kind { get; set; } = string.Empty;
     public string Condition { get; set; } = string.Empty;

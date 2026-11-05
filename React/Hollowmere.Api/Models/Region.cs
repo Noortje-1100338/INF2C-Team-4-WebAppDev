@@ -2,7 +2,7 @@ namespace Hollowmere.Api.Models;
 
 public class Region : IEntity
 {
-    public string Id { get; set; } = string.Empty;
+    public int Id { get; set; }
     public string Name { get; set; } = string.Empty;
 
     public ICollection<Creature> Creatures { get; set; } = new List<Creature>();

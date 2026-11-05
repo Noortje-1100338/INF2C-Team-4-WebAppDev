@@ -2,9 +2,9 @@ namespace Hollowmere.Api.Models;
 
 public class QuestRequest : IEntity
 {
-    public string Id { get; set; } = string.Empty;
-    public string QuestId { get; set; } = string.Empty;
-    public string MemberId { get; set; } = string.Empty;
+    public int Id { get; set; }
+    public int QuestId { get; set; }
+    public int MemberId { get; set; }
     public bool Confirmed { get; set; }
 
     public Quest Quest { get; set; } = null!;

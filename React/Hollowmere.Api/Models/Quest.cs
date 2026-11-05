@@ -2,11 +2,11 @@ namespace Hollowmere.Api.Models;
 
 public class Quest : IEntity
 {
-    public string Id { get; set; } = string.Empty;
-    public string LeaderId { get; set; } = string.Empty;
+    public int Id { get; set; }
+    public int LeaderId { get; set; }
     public string Village { get; set; } = string.Empty;
     public string AreaDescription { get; set; } = string.Empty;
-    public string? CreatureId { get; set; }
+    public int? CreatureId { get; set; }
     public string DepartureDate { get; set; } = string.Empty;
     public int DurationDays { get; set; }
     public int PartySize { get; set; }

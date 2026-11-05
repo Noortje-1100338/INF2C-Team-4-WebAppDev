@@ -10,8 +10,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Hollowmere.Api.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20261105125533_database")]
-    partial class database
+    [Migration("20261105133053_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -21,8 +21,9 @@ namespace Hollowmere.Api.Migrations
 
             modelBuilder.Entity("Hollowmere.Api.Models.Creature", b =>
                 {
-                    b.Property<string>("Id")
-                        .HasColumnType("TEXT");
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
 
                     b.Property<bool>("Dangerous")
                         .HasColumnType("INTEGER");
@@ -39,9 +40,8 @@ namespace Hollowmere.Api.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("RegionId")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
+                    b.Property<int>("RegionId")
+                        .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
 
@@ -52,8 +52,9 @@ namespace Hollowmere.Api.Migrations
 
             modelBuilder.Entity("Hollowmere.Api.Models.Drill", b =>
                 {
-                    b.Property<string>("Id")
-                        .HasColumnType("TEXT");
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
 
                     b.Property<bool>("Cancelled")
                         .HasColumnType("INTEGER");
@@ -62,13 +63,11 @@ namespace Hollowmere.Api.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("InstructorId")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
+                    b.Property<int>("InstructorId")
+                        .HasColumnType("INTEGER");
 
-                    b.Property<string>("SubjectId")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
+                    b.Property<int>("SubjectId")
+                        .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
 
@@ -81,19 +80,18 @@ namespace Hollowmere.Api.Migrations
 
             modelBuilder.Entity("Hollowmere.Api.Models.DrillAttendance", b =>
                 {
-                    b.Property<string>("Id")
-                        .HasColumnType("TEXT");
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
 
                     b.Property<bool>("Confirmed")
                         .HasColumnType("INTEGER");
 
-                    b.Property<string>("DrillId")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
+                    b.Property<int>("DrillId")
+                        .HasColumnType("INTEGER");
 
-                    b.Property<string>("MemberId")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
+                    b.Property<int>("MemberId")
+                        .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
 
@@ -106,20 +104,19 @@ namespace Hollowmere.Api.Migrations
 
             modelBuilder.Entity("Hollowmere.Api.Models.Encounter", b =>
                 {
-                    b.Property<string>("Id")
-                        .HasColumnType("TEXT");
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
 
-                    b.Property<string>("CreatureId")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
+                    b.Property<int>("CreatureId")
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("Outcome")
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("ReportId")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
+                    b.Property<int>("ReportId")
+                        .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
 
@@ -132,8 +129,9 @@ namespace Hollowmere.Api.Migrations
 
             modelBuilder.Entity("Hollowmere.Api.Models.GearItem", b =>
                 {
-                    b.Property<string>("Id")
-                        .HasColumnType("TEXT");
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("Condition")
                         .IsRequired()
@@ -168,20 +166,19 @@ namespace Hollowmere.Api.Migrations
 
             modelBuilder.Entity("Hollowmere.Api.Models.Loan", b =>
                 {
-                    b.Property<string>("Id")
-                        .HasColumnType("TEXT");
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("ConditionNote")
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("GearId")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
+                    b.Property<int>("GearId")
+                        .HasColumnType("INTEGER");
 
-                    b.Property<string>("MemberId")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
+                    b.Property<int>("MemberId")
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("ReturnDate")
                         .IsRequired()
@@ -202,8 +199,9 @@ namespace Hollowmere.Api.Migrations
 
             modelBuilder.Entity("Hollowmere.Api.Models.Member", b =>
                 {
-                    b.Property<string>("Id")
-                        .HasColumnType("TEXT");
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -222,8 +220,9 @@ namespace Hollowmere.Api.Migrations
 
             modelBuilder.Entity("Hollowmere.Api.Models.Product", b =>
                 {
-                    b.Property<string>("Id")
-                        .HasColumnType("TEXT");
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
 
                     b.Property<decimal>("Price")
                         .HasColumnType("TEXT");
@@ -239,8 +238,9 @@ namespace Hollowmere.Api.Migrations
 
             modelBuilder.Entity("Hollowmere.Api.Models.Quest", b =>
                 {
-                    b.Property<string>("Id")
-                        .HasColumnType("TEXT");
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("AreaDescription")
                         .IsRequired()
@@ -249,8 +249,8 @@ namespace Hollowmere.Api.Migrations
                     b.Property<bool>("Cancelled")
                         .HasColumnType("INTEGER");
 
-                    b.Property<string>("CreatureId")
-                        .HasColumnType("TEXT");
+                    b.Property<int?>("CreatureId")
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("DepartureDate")
                         .IsRequired()
@@ -259,9 +259,8 @@ namespace Hollowmere.Api.Migrations
                     b.Property<int>("DurationDays")
                         .HasColumnType("INTEGER");
 
-                    b.Property<string>("LeaderId")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
+                    b.Property<int>("LeaderId")
+                        .HasColumnType("INTEGER");
 
                     b.Property<int>("PartySize")
                         .HasColumnType("INTEGER");
@@ -281,19 +280,18 @@ namespace Hollowmere.Api.Migrations
 
             modelBuilder.Entity("Hollowmere.Api.Models.QuestRequest", b =>
                 {
-                    b.Property<string>("Id")
-                        .HasColumnType("TEXT");
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
 
                     b.Property<bool>("Confirmed")
                         .HasColumnType("INTEGER");
 
-                    b.Property<string>("MemberId")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
+                    b.Property<int>("MemberId")
+                        .HasColumnType("INTEGER");
 
-                    b.Property<string>("QuestId")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
+                    b.Property<int>("QuestId")
+                        .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
 
@@ -306,8 +304,9 @@ namespace Hollowmere.Api.Migrations
 
             modelBuilder.Entity("Hollowmere.Api.Models.Region", b =>
                 {
-                    b.Property<string>("Id")
-                        .HasColumnType("TEXT");
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -320,16 +319,16 @@ namespace Hollowmere.Api.Migrations
 
             modelBuilder.Entity("Hollowmere.Api.Models.Report", b =>
                 {
-                    b.Property<string>("Id")
-                        .HasColumnType("TEXT");
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("DepartureDate")
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("RegionId")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
+                    b.Property<int>("RegionId")
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("Status")
                         .IsRequired()
@@ -339,9 +338,8 @@ namespace Hollowmere.Api.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("WriterId")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
+                    b.Property<int>("WriterId")
+                        .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
 
@@ -354,8 +352,9 @@ namespace Hollowmere.Api.Migrations
 
             modelBuilder.Entity("Hollowmere.Api.Models.Subject", b =>
                 {
-                    b.Property<string>("Id")
-                        .HasColumnType("TEXT");
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -368,8 +367,9 @@ namespace Hollowmere.Api.Migrations
 
             modelBuilder.Entity("Hollowmere.Api.Models.YardClosure", b =>
                 {
-                    b.Property<string>("Id")
-                        .HasColumnType("TEXT");
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("Date")
                         .IsRequired()
