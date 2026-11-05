@@ -20,26 +20,21 @@ function GearForm({ onCancel, onSaved }: GearFormProps) {
         reader.readAsDataURL(file);
     }
 
-    function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+    async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
         event.preventDefault();
         const formData = new FormData(event.currentTarget);
-        const item: GearItem = {
-            id: crypto.randomUUID(),
+        const saved = await saveGearItem({
             name: String(formData.get("name")).trim(),
             kind: String(formData.get("kind")),
             condition: String(formData.get("condition")),
             description: String(formData.get("description")).trim(),
-            dangerous: formData.get("dangerous") === "on",
-            retired: false,
-            loanedTo: null,
-            imageUrl: imageUrl
-        }
-        saveGearItem(item);
-        onSaved(item);
+            dangerous: formData.get("dangerouss") === "on",
+            imageUrl
+        });
+        onSaved(saved);
         event.currentTarget.reset();
         setImageUrl(undefined);
 
-        event.currentTarget.reset();
     }
 
     return (
