@@ -1,6 +1,6 @@
 import { createPortal } from "react-dom";
 import { CheckCircle, AlertCircle, AlertTriangle, Info, X} from "lucide-react";
-import type { Toast, ToastType } from "../../../context/ToastContext";
+import type { Toast, ToastType } from "../../../context/toastContext";
 import "./toast.css";
 
 const icons: Record<ToastType, typeof CheckCircle> = {

@@ -2,6 +2,7 @@ import Button from "../ui/button/button";
 import { saveGearItem, type GearItem } from "../../services/gearRepository";
 import "./gearForm.css";
 import { useState } from "react";
+import useToast from "../../hooks/useToast";
 
 interface GearFormProps {
     onCancel: () => void;
@@ -10,6 +11,8 @@ interface GearFormProps {
 
 function GearForm({ onCancel, onSaved }: GearFormProps) {
     const [ imageUrl, setImageUrl ] = useState<string | undefined>(undefined);
+
+    const {showToast } = useToast();
 
     function handleImageChange(event: React.ChangeEvent<HTMLInputElement>) {
         const file = event.target.files?.[0];
@@ -22,18 +25,24 @@ function GearForm({ onCancel, onSaved }: GearFormProps) {
 
     async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
         event.preventDefault();
-        const formData = new FormData(event.currentTarget);
-        const saved = await saveGearItem({
-            name: String(formData.get("name")).trim(),
-            kind: String(formData.get("kind")),
-            condition: String(formData.get("condition")),
-            description: String(formData.get("description")).trim(),
-            dangerous: formData.get("dangerouss") === "on",
-            imageUrl
-        });
-        onSaved(saved);
-        event.currentTarget.reset();
-        setImageUrl(undefined);
+        const form = event.currentTarget;
+        const formData = new FormData(form);
+        try {
+            const saved = await saveGearItem({
+                name: String(formData.get("name")).trim(),
+                kind: String(formData.get("kind")),
+                condition: String(formData.get("condition")),
+                description: String(formData.get("description")).trim(),
+                dangerous: formData.get("dangerous") === "on",
+                imageUrl
+            });
+            onSaved(saved);
+            showToast({ type: "success", title: "Uitrusting is toegevoegd"});
+            form.reset();
+            setImageUrl(undefined);
+        } catch {
+            showToast({ type: "error", title: "Er is iets misgegaan", message: "Het opslaan van de uitrusting is mislukt. Probeer het opnieuw."});
+        }
 
     }
 
