@@ -16,7 +16,7 @@ public class GearItemService : IGearItemService
 
     public async Task<IEnumerable<GearItemResponse>> GetAllAsync()
     {
-        var items = await _db.GearItems.ToListAsync();
+        var items = await _db.GearItems.OrderByDescending(g => g.Id).ToListAsync();
         return items.Select(ToResponse);
     }
 
