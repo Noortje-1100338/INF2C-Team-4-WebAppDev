@@ -8,7 +8,7 @@ import "./global.css";
 import {useState, useEffect} from "react";
 import { Home, Sword, ScrollText, Trees, BookOpen, Bug, ChevronLeft, ChevronRight, X } from "lucide-react";
 import GearDetailPage from "./pages/detailGear/gearDetailPage";
-
+import { ToastProvider } from "./context/toastContext";
 
 const navItems = [
   { to: "/", label: "Home", icon: Home },
@@ -32,9 +32,7 @@ function App() {
     return () => window.removeEventListener("resize", handleResize);
   }),[];
   return (
-    <Routes>
-      <Route path="/auth" element={<AuthPage />} />
-      <Route path="*" element={
+    <ToastProvider>
       <div className="page">
         {isMobile && !collapsed && (
           <div className="sidebar-backdrop" onClick={() => setCollapsed(true)} />
@@ -71,8 +69,7 @@ function App() {
           </Routes>
         </main>
       </div>
-      } />
-    </Routes>
+    </ToastProvider>
   );
 }
 export default App;

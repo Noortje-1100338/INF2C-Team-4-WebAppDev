@@ -21,8 +21,26 @@
     --color-success: #4d5a3a;
     --color-success-hover: #3b472d;
 
+    --color-toast-success-bg: #2d3527;
+    --color-toast-success-border: #4d5a3a;
+    --color-toast-success-text: #d4e6bb;
+    --color-toast-success-icon: #7ab648;
+
     --color-danger: #b42318;
     --color-danger-hover: #8f1d14;
+
+    --color-toast-error-bg: #3a1a17;
+    --color-toast-error-text: #f0c4c0;
+
+    --color-toast-warning-bg: #3a2e17;
+    --color-toast-warning-border: #8a6b2c;
+    --color-toast-warning-text: #f0dfa0;
+    --color-toast-warning-icon: #c49a2a;
+
+    --color-toast-info-bg: #1e2a3a;
+    --color-toast-info-border: #3a6080;
+    --color-toast-info-text: #b8d4e8;
+    --color-toast-info-icon: #5a9abf;
 } 
 
 *, *::before, *::after {
