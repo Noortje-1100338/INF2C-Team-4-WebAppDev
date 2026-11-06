@@ -25,6 +25,7 @@
     color: var(--color-text);
     font-size: 0.875rem;
     box-sizing: border-box;
+    transition: border-color 0.15s;
 }
 
 .form-group input:focus {
@@ -61,4 +62,30 @@
 
 .auth-form button[type="submit"] {
     margin-top: 0.5rem;
+}
+
+.form-error {
+    font-size: 0.75rem;
+    color: var(--color-danger);
+    margin: 0;
+
+}
+
+.form-label-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+}
+
+input.input-error {
+    border-color: var(--color-danger)
+}
+
+.input-icon-error {
+    position: absolute;
+    right: 0.625rem;
+    color: var(--color-danger);
+    display: flex;
+    align-items: center;
+    pointer-events: none;
 }
