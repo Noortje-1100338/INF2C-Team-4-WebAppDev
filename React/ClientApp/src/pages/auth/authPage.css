@@ -44,6 +44,7 @@
 }
 
 .auth-tab {
+    position: relative;
     flex: 1;
     padding: 0.625rem 1rem;
     border: none;
@@ -60,8 +61,15 @@
     transition: color 0.15s, border-color 0.15s;
 }
 
+.auth-tab-indicator {
+    position: absolute;
+    bottom: -1px;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background-color: var(--color-primary);
+}
 .auth-tab--active {
-    border-bottom-color: var(--color-primary);
     color: var(--color-text);
 }
 
