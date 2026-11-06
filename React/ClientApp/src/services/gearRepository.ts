@@ -4,20 +4,29 @@ import lanterImg from "../assets/lantern.jpg";
 import swordImg from "../assets/sword.jpg";
 import shieldImg from "../assets/shield.jpg";
 export interface GearItem {
-    id: string;
+    id: number;
     name: string;
     kind: string;
     condition: string;
     description: string;
     dangerous: boolean;
     retired: boolean;
-    loanedTo: String | null;
+    loanedTo: string | null;
+    imageUrl?: string;
+}
+
+export interface CreateGearItemRequest {
+    name: string;
+    kind: string; 
+    condition: string;
+    description: string;
+    dangerous: boolean;
     imageUrl?: string;
 }
 
 export const dummyGear: GearItem[] = [
   {
-    id: "1",
+    id: 1,
     name: "Rope",
     kind: "rope",
     condition: "good",
@@ -28,7 +37,7 @@ export const dummyGear: GearItem[] = [
     imageUrl: ropeImg
   },
   {
-    id: "2",
+    id: 2,
     name: "Lantern",
     kind: "lantern",
     condition: "new",
@@ -39,7 +48,7 @@ export const dummyGear: GearItem[] = [
     imageUrl: lanterImg
   },
   {
-    id: "3",
+    id: 3,
     name: "Sword",
     kind: "sword",
     condition: "worn",
@@ -50,7 +59,7 @@ export const dummyGear: GearItem[] = [
     imageUrl: swordImg
   },
   {
-    id: "4",
+    id: 4,
     name: "Shield",
     kind: "shield",
     condition: "damaged",
@@ -62,33 +71,22 @@ export const dummyGear: GearItem[] = [
   } 
 ]
 
-const storageKey = "gear";
+const API_BASE = '/api/gearItem';
 
-export function getGearItems(): GearItem[] {
-    const data = localStorage.getItem(storageKey);
-    if (!data) {
-        return [];
-    }
-    try {
-        const items: unknown = JSON.parse(data);
-        if (!Array.isArray(items)) {
-            return [];
-        }
-        return items as GearItem[];
-    } catch {
-        return [];
-    }
+export async function getGearItems(): Promise<GearItem[]> {
+    const res = await fetch (API_BASE);
+    if (!res.ok) throw new Error ('Failed to fetch gear items');
+    return res.json();
 }
 
-export function saveGearItem(item: GearItem): void {
-    const items = getGearItems();
-    localStorage.setItem(
-        storageKey,
-        JSON.stringify([...items, item])
-    )
-}
-
-
-export function getGearById(id: string): GearItem | undefined{
-    return getGearItems().find(item => item.id === id);
+export async function saveGearItem(request: CreateGearItemRequest): Promise<GearItem> {
+    const res = await fetch(API_BASE, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(request)
+    });
+    if (!res.ok) throw new Error('Failed to save gear item');
+    return res.json();
 }
