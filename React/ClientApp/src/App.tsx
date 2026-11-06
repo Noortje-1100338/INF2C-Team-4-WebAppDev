@@ -3,6 +3,7 @@ import ArmoryPage from "./pages/armoryPage";
 import QuestPage from "./pages/questPage";
 import ArchivePage from "./pages/archivePage";
 import ReportDetailsPage from "./pages/reportDetailsPage";
+import AuthPage from "./pages/auth/AuthPage";
 import "./global.css";
 import {useState, useEffect} from "react";
 import { Home, Sword, ScrollText, Trees, BookOpen, Bug, ChevronLeft, ChevronRight, X } from "lucide-react";
