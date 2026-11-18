@@ -5,7 +5,7 @@
 namespace Hollowmere.Api.Migrations
 {
     /// <inheritdoc />
-    public partial class database : Migration
+    public partial class InitialCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -14,7 +14,8 @@ namespace Hollowmere.Api.Migrations
                 name: "GearItems",
                 columns: table => new
                 {
-                    Id = table.Column<string>(type: "TEXT", nullable: false),
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
                     Name = table.Column<string>(type: "TEXT", nullable: false),
                     Kind = table.Column<string>(type: "TEXT", nullable: false),
                     Condition = table.Column<string>(type: "TEXT", nullable: false),
@@ -32,7 +33,8 @@ namespace Hollowmere.Api.Migrations
                 name: "Members",
                 columns: table => new
                 {
-                    Id = table.Column<string>(type: "TEXT", nullable: false),
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
                     Name = table.Column<string>(type: "TEXT", nullable: false),
                     Trained = table.Column<bool>(type: "INTEGER", nullable: false),
                     Quartermaster = table.Column<bool>(type: "INTEGER", nullable: false)
@@ -46,7 +48,8 @@ namespace Hollowmere.Api.Migrations
                 name: "Products",
                 columns: table => new
                 {
-                    Id = table.Column<string>(type: "TEXT", nullable: false),
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
                     Title = table.Column<string>(type: "TEXT", nullable: false),
                     Price = table.Column<decimal>(type: "TEXT", nullable: false)
                 },
@@ -59,7 +62,8 @@ namespace Hollowmere.Api.Migrations
                 name: "Regions",
                 columns: table => new
                 {
-                    Id = table.Column<string>(type: "TEXT", nullable: false),
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
                     Name = table.Column<string>(type: "TEXT", nullable: false)
                 },
                 constraints: table =>
@@ -71,7 +75,8 @@ namespace Hollowmere.Api.Migrations
                 name: "Subjects",
                 columns: table => new
                 {
-                    Id = table.Column<string>(type: "TEXT", nullable: false),
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
                     Name = table.Column<string>(type: "TEXT", nullable: false)
                 },
                 constraints: table =>
@@ -83,7 +88,8 @@ namespace Hollowmere.Api.Migrations
                 name: "YardClosures",
                 columns: table => new
                 {
-                    Id = table.Column<string>(type: "TEXT", nullable: false),
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
                     Date = table.Column<string>(type: "TEXT", nullable: false)
                 },
                 constraints: table =>
@@ -95,9 +101,10 @@ namespace Hollowmere.Api.Migrations
                 name: "Loans",
                 columns: table => new
                 {
-                    Id = table.Column<string>(type: "TEXT", nullable: false),
-                    GearId = table.Column<string>(type: "TEXT", nullable: false),
-                    MemberId = table.Column<string>(type: "TEXT", nullable: false),
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    GearId = table.Column<int>(type: "INTEGER", nullable: false),
+                    MemberId = table.Column<int>(type: "INTEGER", nullable: false),
                     StartDate = table.Column<string>(type: "TEXT", nullable: false),
                     ReturnDate = table.Column<string>(type: "TEXT", nullable: false),
                     ConditionNote = table.Column<string>(type: "TEXT", nullable: false)
@@ -123,9 +130,10 @@ namespace Hollowmere.Api.Migrations
                 name: "Creatures",
                 columns: table => new
                 {
-                    Id = table.Column<string>(type: "TEXT", nullable: false),
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
                     Name = table.Column<string>(type: "TEXT", nullable: false),
-                    RegionId = table.Column<string>(type: "TEXT", nullable: false),
+                    RegionId = table.Column<int>(type: "INTEGER", nullable: false),
                     Description = table.Column<string>(type: "TEXT", nullable: false),
                     ImageUrl = table.Column<string>(type: "TEXT", nullable: false),
                     Dangerous = table.Column<bool>(type: "INTEGER", nullable: false)
@@ -145,9 +153,10 @@ namespace Hollowmere.Api.Migrations
                 name: "Reports",
                 columns: table => new
                 {
-                    Id = table.Column<string>(type: "TEXT", nullable: false),
-                    WriterId = table.Column<string>(type: "TEXT", nullable: false),
-                    RegionId = table.Column<string>(type: "TEXT", nullable: false),
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    WriterId = table.Column<int>(type: "INTEGER", nullable: false),
+                    RegionId = table.Column<int>(type: "INTEGER", nullable: false),
                     DepartureDate = table.Column<string>(type: "TEXT", nullable: false),
                     Text = table.Column<string>(type: "TEXT", nullable: false),
                     Status = table.Column<string>(type: "TEXT", nullable: false)
@@ -173,9 +182,10 @@ namespace Hollowmere.Api.Migrations
                 name: "Drills",
                 columns: table => new
                 {
-                    Id = table.Column<string>(type: "TEXT", nullable: false),
-                    SubjectId = table.Column<string>(type: "TEXT", nullable: false),
-                    InstructorId = table.Column<string>(type: "TEXT", nullable: false),
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    SubjectId = table.Column<int>(type: "INTEGER", nullable: false),
+                    InstructorId = table.Column<int>(type: "INTEGER", nullable: false),
                     Date = table.Column<string>(type: "TEXT", nullable: false),
                     Cancelled = table.Column<bool>(type: "INTEGER", nullable: false)
                 },
@@ -200,11 +210,12 @@ namespace Hollowmere.Api.Migrations
                 name: "Quests",
                 columns: table => new
                 {
-                    Id = table.Column<string>(type: "TEXT", nullable: false),
-                    LeaderId = table.Column<string>(type: "TEXT", nullable: false),
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    LeaderId = table.Column<int>(type: "INTEGER", nullable: false),
                     Village = table.Column<string>(type: "TEXT", nullable: false),
                     AreaDescription = table.Column<string>(type: "TEXT", nullable: false),
-                    CreatureId = table.Column<string>(type: "TEXT", nullable: true),
+                    CreatureId = table.Column<int>(type: "INTEGER", nullable: true),
                     DepartureDate = table.Column<string>(type: "TEXT", nullable: false),
                     DurationDays = table.Column<int>(type: "INTEGER", nullable: false),
                     PartySize = table.Column<int>(type: "INTEGER", nullable: false),
@@ -230,9 +241,10 @@ namespace Hollowmere.Api.Migrations
                 name: "Encounters",
                 columns: table => new
                 {
-                    Id = table.Column<string>(type: "TEXT", nullable: false),
-                    ReportId = table.Column<string>(type: "TEXT", nullable: false),
-                    CreatureId = table.Column<string>(type: "TEXT", nullable: false),
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    ReportId = table.Column<int>(type: "INTEGER", nullable: false),
+                    CreatureId = table.Column<int>(type: "INTEGER", nullable: false),
                     Outcome = table.Column<string>(type: "TEXT", nullable: false)
                 },
                 constraints: table =>
@@ -256,9 +268,10 @@ namespace Hollowmere.Api.Migrations
                 name: "DrillAttendances",
                 columns: table => new
                 {
-                    Id = table.Column<string>(type: "TEXT", nullable: false),
-                    DrillId = table.Column<string>(type: "TEXT", nullable: false),
-                    MemberId = table.Column<string>(type: "TEXT", nullable: false),
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    DrillId = table.Column<int>(type: "INTEGER", nullable: false),
+                    MemberId = table.Column<int>(type: "INTEGER", nullable: false),
                     Confirmed = table.Column<bool>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
@@ -282,9 +295,10 @@ namespace Hollowmere.Api.Migrations
                 name: "QuestRequests",
                 columns: table => new
                 {
-                    Id = table.Column<string>(type: "TEXT", nullable: false),
-                    QuestId = table.Column<string>(type: "TEXT", nullable: false),
-                    MemberId = table.Column<string>(type: "TEXT", nullable: false),
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    QuestId = table.Column<int>(type: "INTEGER", nullable: false),
+                    MemberId = table.Column<int>(type: "INTEGER", nullable: false),
                     Confirmed = table.Column<bool>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>

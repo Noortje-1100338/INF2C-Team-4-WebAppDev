@@ -6,10 +6,16 @@ import "./armoryPage.css";
 import GearGrid from "../components/armory/gearGrid";
 import { Grid2x2, List } from "lucide-react";
 import { useState, useEffect } from "react";
-import { dummyGear } from "../services/gearRepository";
+import { getGearItems, type GearItem } from "../services/gearRepository";
 const viewModeStorageKey = "armory-view-mode";
 
 function ArmoryPage() {
+  const [items, setItems] = useState<GearItem[]>([]);
+
+  useEffect(() => {
+    getGearItems().then(setItems);
+  }, []);
+
   const [viewMode, setViewMode] = useState<"grid" | "list">(() => {
     if (window.matchMedia("(max-width: 860px)").matches) {
       return "grid";
@@ -67,14 +73,14 @@ function ArmoryPage() {
         </div>
       </header>
 
-      <GearGrid items={dummyGear} viewMode={viewMode} />
+      <GearGrid items={items} viewMode={viewMode} />
       <Modal
         isOpen={isOpen}
         onClose={closeModal}
         eyebrow="Uitrusting"
         title="Uitrusting toevoegen"
       >
-        <GearForm onCancel={closeModal} onSaved={closeModal} />
+        <GearForm onCancel={closeModal} onSaved={(newItem) => { setItems((prev) => [...prev, newItem]); closeModal(); }} />
       </Modal>
     </main>
   )
