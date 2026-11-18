@@ -2,9 +2,9 @@ namespace Hollowmere.Api.Models;
 
 public class Creature : IEntity
 {
-    public string Id { get; set; } = string.Empty;
+    public int Id { get; set; }
     public string Name { get; set; } = string.Empty;
-    public string RegionId { get; set; } = string.Empty;
+    public int RegionId { get; set; }
     public string Description { get; set; } = string.Empty;
     public string ImageUrl { get; set; } = string.Empty;
     public bool Dangerous { get; set; }

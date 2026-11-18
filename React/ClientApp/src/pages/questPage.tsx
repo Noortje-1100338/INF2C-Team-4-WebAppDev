@@ -1,11 +1,11 @@
-import { useState } from "react";
 import Button from "../components/ui/button/button";
 import Modal from "../components/ui/modal/modal";
 import QuestForm from "../components/quest/questForm";
 import QuestOverview from "../components/quest/questOverview";
 import useModal from "../hooks/useModal";
+import { useEffect, useState } from "react";
 import {
-  getQuests,
+  fetchQuests,
   questCreatures,
   questMembers,
   saveQuests,
@@ -23,22 +23,43 @@ function getLocalToday(): string {
   return `${year}-${month}-${day}`;
 }
 
-function findCreature(creatureId: string | null) {
+function findCreature(creatureId: number | null) {
   return questCreatures.find((creature) => creature.id === creatureId);
-}
-
-function loadInitialQuestState(): { quests: Quest[]; error: string } {
-  try {
-    return { quests: getQuests(), error: "" };
-  } catch {
-    return { quests: [], error: "De quests konden niet worden geladen." };
-  }
 }
 
 function QuestPage() {
   const { isOpen, openModal, closeModal } = useModal();
-  const [questState, setQuestState] = useState(loadInitialQuestState);
-  const [currentMemberId, setCurrentMemberId] = useState("member-7");
+  const [questState, setQuestState] = useState<{
+    quests: Quest[];
+    error: string;
+  }>({
+    quests: [],
+    error: "",
+  });
+  useEffect(() => {
+    let isCurrent = true;
+
+    fetchQuests()
+      .then((quests) => {
+        if (isCurrent) {
+          setQuestState({ quests, error: "" });
+        }
+      })
+      .catch(() => {
+        if (isCurrent) {
+          setQuestState({
+            quests: [],
+            error: "De quests konden niet worden geladen.",
+          });
+        }
+      });
+
+    return () => {
+      isCurrent = false;
+    };
+  }, []);
+
+  const [currentMemberId, setCurrentMemberId] = useState(7);
   const [editingQuest, setEditingQuest] = useState<Quest | null>(null);
   const [notice, setNotice] = useState("");
   const currentMember = questMembers.find(
@@ -64,7 +85,7 @@ function QuestPage() {
   }
 
   function saveQuestChange(
-    questId: string,
+    questId: number,
     updatedQuest: Quest,
     successMessage: string,
   ): string | null {
@@ -137,7 +158,7 @@ function QuestPage() {
       setNotice("De quest is bijgewerkt.");
     } else {
       const newQuest: Quest = {
-        id: crypto.randomUUID(),
+        id: 0,
         leaderId: activeMember.id,
         ...details,
         cancelled: false,
@@ -174,7 +195,7 @@ function QuestPage() {
   }
 
   // Aanvraag plek quest
-  function requestPlace(questId: string): void {
+  function requestPlace(questId: number): void {
     const quest = quests.find((item) => item.id === questId);
     if (!quest) {
       setNotice("Deze quest bestaat niet meer.");
@@ -200,7 +221,7 @@ function QuestPage() {
       requests: [
         ...quest.requests,
         {
-          id: crypto.randomUUID(),
+          id: 0,
           memberId: activeMember.id,
           confirmed: false,
         },
@@ -214,7 +235,7 @@ function QuestPage() {
   }
 
   // Goedkeuren van een aanvraag, controleer rechten en plekken
-  function confirmRequest(questId: string, requestId: string): void {
+  function confirmRequest(questId: number, requestId: number): void {
     const quest = quests.find((item) => item.id === questId);
     const request = quest?.requests.find((item) => item.id === requestId);
     const requestedMember = questMembers.find(
@@ -284,7 +305,7 @@ function QuestPage() {
   }
 
   // Leiderschap overdragen
-  function transferLeadership(questId: string, newLeaderId: string): void {
+  function transferLeadership(questId: number, newLeaderId: number): void {
     const quest = quests.find((item) => item.id === questId);
     if (!quest || quest.leaderId !== activeMember.id || quest.cancelled) {
       setNotice("Alleen de leider kan het leiderschap overdragen.");
@@ -337,7 +358,7 @@ function QuestPage() {
             id="demo-member"
             value={currentMemberId}
             onChange={(event) => {
-              setCurrentMemberId(event.target.value);
+              setCurrentMemberId(Number(event.target.value));
               setNotice("");
             }}
           >

@@ -2,9 +2,9 @@ namespace Hollowmere.Api.Models;
 
 public class Drill : IEntity
 {
-    public string Id { get; set; } = string.Empty;
-    public string SubjectId { get; set; } = string.Empty;
-    public string InstructorId { get; set; } = string.Empty;
+    public int Id { get; set; }
+    public int SubjectId { get; set; }
+    public int InstructorId { get; set; }
     public string Date { get; set; } = string.Empty;
     public bool Cancelled { get; set; }
 
