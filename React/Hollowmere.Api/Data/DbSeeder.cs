@@ -82,43 +82,6 @@ public static class DbSeeder
         DateOnly.FromDateTime(DateTime.Today.AddDays(days))
             .ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
 
-    var requests = new[]
-{
-    new QuestRequest
-    {
-        Id = 1,
-        QuestId = 1,
-        MemberId = 12,
-        Confirmed = true
-    },
-    new QuestRequest
-    {
-        Id = 2,
-        QuestId = 1,
-        MemberId = 9,
-        Confirmed = false
-    },
-    new QuestRequest
-    {
-        Id = 3,
-        QuestId = 2,
-        MemberId = 1,
-        Confirmed = false
-    }
-};
-
-    var existingRequestIds = await db.QuestRequests
-        .Select(q => q.Id)
-        .ToListAsync();
-
-    db.QuestRequests.AddRange(
-        requests.Where(q => !existingRequestIds.Contains(q.Id))
-    );
-
-    await db.SaveChangesAsync();
-
-    await db.SaveChangesAsync();
-
     var quests = new[]
 {
     new Quest
@@ -156,6 +119,39 @@ public static class DbSeeder
     );
 
     await db.SaveChangesAsync();
+
+    var requests = new[]
+    {
+        new QuestRequest
+        {
+            Id = 1,
+            QuestId = 1,
+            MemberId = 12,
+            Confirmed = true
+        },
+        new QuestRequest
+        {
+            Id = 2,
+            QuestId = 1,
+            MemberId = 9,
+            Confirmed = false
+        },
+        new QuestRequest
+        {
+            Id = 3,
+            QuestId = 2,
+            MemberId = 1,
+            Confirmed = false
+        }
+    };
+
+    var existingRequestIds = await db.QuestRequests
+        .Select(q => q.Id)
+        .ToListAsync();
+
+    db.QuestRequests.AddRange(
+        requests.Where(q => !existingRequestIds.Contains(q.Id))
+    );
 
     await db.SaveChangesAsync();
   }
