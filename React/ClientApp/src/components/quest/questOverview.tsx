@@ -11,28 +11,28 @@ import "./questOverview.css";
 interface QuestOverviewProps {
   quests: Quest[];
   currentMember: QuestMember;
-  onRequest: (questId: string) => void;
-  onConfirm: (questId: string, requestId: string) => void;
+  onRequest: (questId: number) => void;
+  onConfirm: (questId: number, requestId: number) => void;
   onEdit: (quest: Quest) => void;
   onCancelQuest: (quest: Quest) => void;
-  onTransfer: (questId: string, memberId: string) => void;
+  onTransfer: (questId: number, memberId: number) => void;
 }
 
 interface QuestCardProps {
   quest: Quest;
   currentMember: QuestMember;
   today: string;
-  onRequest: (questId: string) => void;
-  onConfirm: (questId: string, requestId: string) => void;
+  onRequest: (questId: number) => void;
+  onConfirm: (questId: number, requestId: number) => void;
   onEdit: (quest: Quest) => void;
   onCancelQuest: (quest: Quest) => void;
-  onTransfer: (questId: string, memberId: string) => void;
+  onTransfer: (questId: number, memberId: number) => void;
 }
 
 type QuestOwnerFilter = "all" | "mine";
 type TypeFilter = "all" | "dangerous" | "regular" | "cancelled";
 
-function getCreature(creatureId: string | null) {
+function getCreature(creatureId: number | null) {
   return questCreatures.find((creature) => creature.id === creatureId);
 }
 
@@ -79,7 +79,7 @@ function QuestCard({
   onCancelQuest,
   onTransfer,
 }: QuestCardProps) {
-  const [newLeaderId, setNewLeaderId] = useState("");
+  const [newLeaderId, setNewLeaderId] = useState<number | null>(null);
   const leader = questMembers.find((member) => member.id === quest.leaderId);
   const creature = getCreature(quest.creatureId);
   const confirmedRequests = quest.requests.filter(
@@ -109,11 +109,11 @@ function QuestCard({
   returnDate.setDate(returnDate.getDate() + quest.durationDays);
 
   function transferLeader(): void {
-    if (!newLeaderId) {
+    if (newLeaderId === null) {
       return;
     }
     onTransfer(quest.id, newLeaderId);
-    setNewLeaderId("");
+    setNewLeaderId(null);
   }
 
   return (
@@ -248,8 +248,8 @@ function QuestCard({
               <div>
                 <select
                   id={`transfer-${quest.id}`}
-                  value={newLeaderId}
-                  onChange={(event) => setNewLeaderId(event.target.value)}
+                  value={newLeaderId ?? ""}
+                  onChange={(event) => setNewLeaderId(Number(event.target.value))}
                 >
                   <option value="">Kies een bevestigd lid</option>
                   {availableMembers.map((member) => (

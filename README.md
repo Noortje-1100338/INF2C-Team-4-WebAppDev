@@ -13,6 +13,14 @@
 
 3. Open de URL uit de terminal (meestal `http://localhost:5173`).
 
+# Backend
+cd react/hollowmere.api
+dotnet run
+
+cd react/hollowmere.api
+dotnet ef migrations add [naam commit]
+dotnet ef database update
+
 ## Case: Hollowmere
 
 Hollowmere is an adventurers' guild of about ninety members, most of them young and not yet very good at it. Their hall stands at the edge of the town. The quest board and the letter box are on the ground floor. The yard is behind the hall, the armoury is in the basement, and the archive is a chest under the stairs. Letters from the villages up the valley arrive in the letter box. Each asks for help with something: the wyvern from the marsh has learned which day the market is, and a ghost in the mill at the ford stops the wheel at midnight. The wolves of the forest road are back too, in a letter from the same farmer as last month. Whichever member gets to the letters first picks one, pins it on the board as a quest and gathers a party. The party goes, and most of the time it returns and hands its gear back to the armoury. It writes down what happened on whatever scrap of paper can be found, sometimes in runes.
