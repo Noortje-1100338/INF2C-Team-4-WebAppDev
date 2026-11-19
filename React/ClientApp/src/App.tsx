@@ -9,6 +9,8 @@ import {useState, useEffect} from "react";
 import { Home, Sword, ScrollText, Trees, BookOpen, Bug, ChevronLeft, ChevronRight, X } from "lucide-react";
 import GearDetailPage from "./pages/detailGear/gearDetailPage";
 import { ToastProvider } from "./context/toastContext";
+import { useNavigate, Navigate } from "react-router";
+import { LogOut } from "lucide-react";
 
 const navItems = [
   { to: "/", label: "Home", icon: Home },
@@ -18,9 +20,22 @@ const navItems = [
   { to: "/gear", label: "Gear", icon: BookOpen },
   { to: "/bugs", label: "Bugs", icon: Bug }
 ];
+
+function ProtectedRoute({ children }: { children: React.ReactNode }) {
+  const token = localStorage.getItem("token");
+  if (!token) return <Navigate to="/auth" replace />;
+  return <>{children}</>;
+}
+
 function AppLayout() {
   const [isMobile, setIsMobile] = useState(() => window.innerWidth < 768);
   const [collapsed, setCollapsed] = useState(() => window.innerWidth < 768);
+  const navigate = useNavigate();
+
+  function handleLogout() {
+    localStorage.removeItem("token");
+    navigate("/auth");
+  }
 
   useEffect(() => {
     const handleResize = () => {
@@ -53,6 +68,12 @@ function AppLayout() {
             </NavLink>
           ))}
         </div>
+        <div className="sidebar-footer">
+          <button className="sidebar-logout" onClick={handleLogout} title={collapsed ? "Uitloggen" : undefined}>
+            <LogOut size={18} className="nav-icon" />
+            {!collapsed && <span>Uitloggen</span>}
+          </button>
+        </div>
       </nav>
 
       <main className="content">
@@ -76,7 +97,7 @@ function App() {
     <ToastProvider>
       <Routes>
         <Route path="/auth" element={<AuthPage />} />
-        <Route path="/*" element={<AppLayout />} />
+        <Route path="/*" element={<ProtectedRoute><AppLayout /></ProtectedRoute>} />
       </Routes>
     </ToastProvider>
   );
