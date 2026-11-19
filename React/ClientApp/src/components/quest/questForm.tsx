@@ -31,7 +31,7 @@ function getQuestDetails(
   return {
     village: String(formData.get("village")).trim(),
     areaDescription: String(formData.get("areaDescription")).trim(),
-    creatureId: hasCreature ? String(formData.get("creatureId")) : null,
+    creatureId: hasCreature ? Number(formData.get("creatureId")) : null,
     departureDate: String(formData.get("departureDate")),
     durationDays: Number(formData.get("durationDays")),
     partySize: Number(formData.get("partySize")),
