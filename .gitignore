@@ -8,6 +8,9 @@
 *.db-shm
 *.db-wal
 
+# Local secrets
+appsettings.Development.json
+
 # User-specific files
 *.rsuser
 *.suo
