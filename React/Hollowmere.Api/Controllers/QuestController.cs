@@ -40,6 +40,11 @@ public class QuestController : BaseController
   [HttpPost]
   public async Task<ActionResult<QuestResponse>> PostQuest(CreateQuestRequest request)
   {
+    if (!request.DepartureDate.HasValue)
+    {
+      return BadRequest("A valid departure date is required.");
+    }
+
     var leader = await Context.Members.FindAsync(request.LeaderId);
     if (leader == null)
     {
@@ -67,7 +72,7 @@ public class QuestController : BaseController
       Village = request.Village,
       AreaDescription = request.AreaDescription,
       CreatureId = request.CreatureId,
-      DepartureDate = request.DepartureDate,
+      DepartureDate = request.DepartureDate.Value.ToString("yyyy-MM-dd"),
       DurationDays = request.DurationDays,
       PartySize = request.PartySize,
       Cancelled = false

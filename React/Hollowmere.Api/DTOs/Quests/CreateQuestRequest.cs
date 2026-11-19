@@ -17,7 +17,7 @@ public class CreateQuestRequest
     public int? CreatureId { get; set; }
 
     [Required]
-    public string DepartureDate { get; set; } = string.Empty;
+    public DateOnly? DepartureDate { get; set; }
 
     [Range(1, int.MaxValue)]
     public int DurationDays { get; set; }
