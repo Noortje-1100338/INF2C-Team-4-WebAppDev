@@ -1,6 +1,7 @@
 using Hollowmere.Api.Data;
 using Microsoft.EntityFrameworkCore;
 using Hollowmere.Api.Services;
+using Hollowmere.Api.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -17,6 +18,12 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 );
 
 builder.Services.AddScoped<IGearItemService, GearItemService>();
+
+builder.Services.AddScoped<IReportRepository, ReportRepository>();
+
+builder.Services.AddScoped<IReportService, ReportService>();
+
+builder.Services.AddScoped<ILookupService, LookupService>();
 
 builder.Services.AddCors(options =>
 {
