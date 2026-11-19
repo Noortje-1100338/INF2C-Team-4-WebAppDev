@@ -16,6 +16,7 @@ function LoginForm() {
     const [errors, setErrors] = useState<LoginErrors>({});
     const { login } = useAuth();
     const navigate = useNavigate();
+    const [isLoading, setIsLoading] = useState(false);
 
     function validate(email: string, password: string): LoginErrors {
         const e: LoginErrors = {};
@@ -37,10 +38,13 @@ function LoginForm() {
         if (Object.keys(e).length > 0) return;
     
         try {
+            setIsLoading(true);
             await login(email, password);
             navigate("/");
         } catch {
             setErrors({ email: "Ongeldig emailadres of wachtwoord"});
+        } finally {
+            setIsLoading(false);
         }
     }
 
@@ -68,7 +72,7 @@ function LoginForm() {
                     </button>
                 </div>
             </div>
-            <Button type="submit">Inloggen</Button>
+            <Button type="submit" disabled={isLoading}>{ isLoading ? "Bezig...": "Inloggen" }</Button>
         </form>
     );
 }

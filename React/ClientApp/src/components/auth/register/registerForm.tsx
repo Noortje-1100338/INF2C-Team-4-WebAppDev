@@ -17,6 +17,7 @@ function RegisterForm({ onSuccess }: { onSuccess: () => void}) {
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const [errors, setErrors] = useState<RegisterErrors>({});
+    const [isLoading, setIsLoading] = useState(false);
     const { register } = useAuth();
     const { showToast } = useToast();
 
@@ -47,12 +48,15 @@ function RegisterForm({ onSuccess }: { onSuccess: () => void}) {
         if (Object.keys(e).length > 0) return;
 
         try {
+            setIsLoading(true);
             await register(name, email, password);
             form.reset();
             showToast({ type: "success", title: "Account aangemaakt!" });
             onSuccess();
         } catch {
             setErrors({ email: "Email is al in gebruik" });
+        } finally {
+            setIsLoading(false);
         }
 
     }
@@ -103,7 +107,7 @@ function RegisterForm({ onSuccess }: { onSuccess: () => void}) {
                     </button>
                 </div>
             </div>
-            <Button type="submit">Registreren</Button>
+            <Button type="submit" disabled={isLoading}>{ isLoading ? "Bezig...": "Registreren" }</Button>
         </form>
     )
 }
