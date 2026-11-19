@@ -1,17 +1,54 @@
 .sidebar {
     width: 230px;
-    min-height: 100vh;
-    padding: 30px 20px;
+    height: 100vh;
+    position: sticky;
+    top: 0;
+    padding: 30px 16px;
     box-sizing: border-box;
     background-color: var(--color-nav);
     border-right: 1px solid var(--color-nav);
     flex-shrink: 0;
-
+    transition: width 0.25s ease;
+    overflow-y: auto;
 }
 
+.sidebar--collapsed {
+    width: 64px;
+}
+
+.sidebar-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 40px;
+}
+
+.sidebar--collapsed .sidebar-header {
+    justify-content: center;
+}
 .sidebar h2 {
-    margin: 0 0 40px 0;
+    margin: 0;
     color: white;
+    white-space: nowrap;
+}
+
+.sidebar-toggle {
+    background: none;
+    border: none;
+    color: white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4px;
+    border-radius: 6px;
+    opacity: 0.6;
+    flex-shrink: 0;
+}
+
+.sidebar-toggle:hover {
+    opacity: 1;
+    background-color: rgba(255, 255, 255, 0.1);
 }
 
 .pages-on-menu {
@@ -21,11 +58,20 @@
 }
 
 .pages-on-menu a {
-    display: block;
+    display: flex;
+    align-items: center;
+    gap: 10px;
     padding: 12px 14px;
     color: white;
     text-decoration: none;
     border-radius: 10px;
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+.sidebar--collapsed .pages-on-menu a {
+    justify-content: center;
+    padding: 12px;
 }
 
 .pages-on-menu a:hover {
@@ -35,6 +81,10 @@
 .pages-on-menu a.active {
     color: var(--color-primary-light);
     font-weight: 600
+}
+
+.nav-icon {
+    flex-shrink: 0;
 }
 
 .content {
@@ -66,3 +116,29 @@
     border-radius: 10px;
 }
 
+@media (max-width: 768px) {
+    .sidebar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        height: 100vh;
+        width: 280px;
+        z-index: 1000;
+        transition: width 0.3s ease;
+        padding: 30px 20px;
+        overflow: hidden;
+    }
+
+    .sidebar--collapsed {
+        width: 64px;
+    }
+    .sidebar-backdrop {
+        position: fixed;
+        inset: 0;
+        z-index: 999;
+    }
+
+    .content {
+        padding-left: calc(64px + 20px);
+    }
+}
