@@ -5,14 +5,12 @@ export function useAuth() {
             headers: {
                 "Content-Type": "application/json"
             },
+            credentials: "include",
             body: JSON.stringify({ email, password })
         })
 
         if (!response.ok) throw new Error("Ongeldig Email of Wachtwoord");
-
-        const data = await response.json();
-        localStorage.setItem("token", data.token);
-        return data;
+        return await response.json();
     }
 
     async function register(name: string, email: string, password: string) {
@@ -21,23 +19,28 @@ export function useAuth() {
             headers: {
                 "Content-Type": "application/json"
             },
+            credentials: "include",
             body: JSON.stringify({ name, email, password })
         })
 
         if (!response.ok) throw new Error("Registratie mislukt");
-
-        const data = await response.json();
-        localStorage.setItem("token", data.token);
-        return data;
+        return await response.json();
     }
 
-    function logout() {
-        localStorage.removeItem("token");
+    async function logout() {
+        await fetch("http://localhost:5043/api/auth/logout", {
+            method: "POST",
+            credentials: "include"
+        });
     }
 
-    function getToken() {
-        return localStorage.getItem("token");
+    async function me() {
+        const response = await fetch("http://localhost:5043/api/auth/me", {
+            credentials: "include"
+        });
+        if (!response.ok) throw new Error("Niet ingelogd");
+        return await response.json() as { name: string, email: string };
     }
 
-    return { login, register, logout, getToken };
+    return { login, register, logout, me };
 }

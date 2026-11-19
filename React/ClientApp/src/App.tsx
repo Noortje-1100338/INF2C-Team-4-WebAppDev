@@ -1,4 +1,6 @@
-import { NavLink, Route, Routes, useLocation } from "react-router";
+import { AuthProvider, useAuthContext } from "./context/authContext";
+import { useAuth } from "./hooks/useAuth";
+import { NavLink, Route, Routes } from "react-router";
 import ArmoryPage from "./pages/armoryPage";
 import QuestPage from "./pages/questPage";
 import ArchivePage from "./pages/archivePage";
@@ -9,6 +11,8 @@ import {useState, useEffect} from "react";
 import { Home, Sword, ScrollText, Trees, BookOpen, Bug, ChevronLeft, ChevronRight, X } from "lucide-react";
 import GearDetailPage from "./pages/detailGear/gearDetailPage";
 import { ToastProvider } from "./context/toastContext";
+import { useNavigate, Navigate } from "react-router";
+import { LogOut } from "lucide-react";
 
 const navItems = [
   { to: "/", label: "Home", icon: Home },
@@ -18,9 +22,27 @@ const navItems = [
   { to: "/gear", label: "Gear", icon: BookOpen },
   { to: "/bugs", label: "Bugs", icon: Bug }
 ];
+
+function ProtectedRoute({ children }: { children: React.ReactNode }) {
+  const { user, isLoading } = useAuthContext();
+  if (isLoading) return null;
+  if (!user) return <Navigate to="/auth" replace />;
+  return <>{children}</>;
+}
+
 function AppLayout() {
   const [isMobile, setIsMobile] = useState(() => window.innerWidth < 768);
   const [collapsed, setCollapsed] = useState(() => window.innerWidth < 768);
+  const navigate = useNavigate();
+
+  const { logout } = useAuth();
+  const { setUser } = useAuthContext();
+
+  async function handleLogout() {
+    await logout();
+    setUser(null);
+    navigate("/auth");
+  }
 
   useEffect(() => {
     const handleResize = () => {
@@ -53,6 +75,12 @@ function AppLayout() {
             </NavLink>
           ))}
         </div>
+        <div className="sidebar-footer">
+          <button className="sidebar-logout" onClick={handleLogout} title={collapsed ? "Uitloggen" : undefined}>
+            <LogOut size={18} className="nav-icon" />
+            {!collapsed && <span>Uitloggen</span>}
+          </button>
+        </div>
       </nav>
 
       <main className="content">
@@ -74,10 +102,12 @@ function AppLayout() {
 function App() {
   return (
     <ToastProvider>
-      <Routes>
-        <Route path="/auth" element={<AuthPage />} />
-        <Route path="/*" element={<AppLayout />} />
-      </Routes>
+      <AuthProvider>
+        <Routes>
+          <Route path="/auth" element={<AuthPage />} />
+          <Route path="/*" element={<ProtectedRoute><AppLayout /></ProtectedRoute>} />
+        </Routes>
+      </AuthProvider>
     </ToastProvider>
   );
 }

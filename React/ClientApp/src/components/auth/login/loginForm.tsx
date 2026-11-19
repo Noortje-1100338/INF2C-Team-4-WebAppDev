@@ -5,6 +5,7 @@ import { FormError, ErrorIcon } from "../formError";
 import "../auth.css";
 import { useAuth } from "../../../hooks/useAuth";
 import { useNavigate } from "react-router";
+import { useAuthContext } from "../../../context/authContext";
 
 type LoginErrors = {
     email?: string;
@@ -16,6 +17,7 @@ function LoginForm() {
     const [errors, setErrors] = useState<LoginErrors>({});
     const { login } = useAuth();
     const navigate = useNavigate();
+    const { setUser } = useAuthContext();
     const [isLoading, setIsLoading] = useState(false);
 
     function validate(email: string, password: string): LoginErrors {
@@ -32,14 +34,14 @@ function LoginForm() {
         const formData = new FormData(form);
         const email = formData.get("email") as string;
         const password = formData.get("password") as string;
-
         const e = validate(email, password);
         setErrors(e);
         if (Object.keys(e).length > 0) return;
     
         try {
             setIsLoading(true);
-            await login(email, password);
+            const user = await login(email, password);
+            setUser(user);
             navigate("/");
         } catch {
             setErrors({ email: "Ongeldig emailadres of wachtwoord"});
