@@ -53,8 +53,8 @@ function AuthPage() {
                     <motion.div key={activeTab} initial={{ opacity: 0, y: 16}}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -16 }}
-                        transition={{ duration: 0.32}}>
-                        {activeTab === "login" ? <LoginForm /> : <RegisterForm />}
+                        transition={{ duration: 0.18 }}>
+                        {activeTab === "login" ? <LoginForm /> : <RegisterForm onSuccess={() => setActiveTab("login")} />}
                     </motion.div>
                 </AnimatePresence>
             </motion.div>

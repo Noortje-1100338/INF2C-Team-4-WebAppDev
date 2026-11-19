@@ -3,6 +3,8 @@ import { Eye, EyeOff } from "lucide-react";
 import Button from "../../ui/button/button";
 import { FormError, ErrorIcon } from "../formError";
 import "../auth.css";
+import { useAuth } from "../../../hooks/useAuth";
+import useToast from "../../../hooks/useToast";
 
 type RegisterErrors = {
     name?: string;
@@ -11,10 +13,12 @@ type RegisterErrors = {
     confirmPassword?: string;
 }
 
-function RegisterForm() {
+function RegisterForm({ onSuccess }: { onSuccess: () => void}) {
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const [errors, setErrors] = useState<RegisterErrors>({});
+    const { register } = useAuth();
+    const { showToast } = useToast();
 
     function validate(name: string, email: string, password: string, confirmPassword: string): RegisterErrors {
         const e: RegisterErrors = {};
@@ -29,7 +33,7 @@ function RegisterForm() {
         return e;
     }
 
-    function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+    async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
         event.preventDefault();
         const form = event.currentTarget;
         const formData = new FormData(form);
@@ -42,7 +46,15 @@ function RegisterForm() {
         setErrors(e);
         if (Object.keys(e).length > 0) return;
 
-        console.log({ name, email, password, confirmPassword });
+        try {
+            await register(name, email, password);
+            form.reset();
+            showToast({ type: "success", title: "Account aangemaakt!" });
+            onSuccess();
+        } catch {
+            setErrors({ email: "Email is al in gebruik" });
+        }
+
     }
 
     return (

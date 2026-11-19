@@ -3,7 +3,8 @@ import { Eye, EyeOff } from "lucide-react";
 import Button from "../../ui/button/button";
 import { FormError, ErrorIcon } from "../formError";
 import "../auth.css";
-
+import { useAuth } from "../../../hooks/useAuth";
+import { useNavigate } from "react-router";
 
 type LoginErrors = {
     email?: string;
@@ -13,6 +14,8 @@ type LoginErrors = {
 function LoginForm() {
     const [showPassword, setShowPassword] = useState(false);
     const [errors, setErrors] = useState<LoginErrors>({});
+    const { login } = useAuth();
+    const navigate = useNavigate();
 
     function validate(email: string, password: string): LoginErrors {
         const e: LoginErrors = {};
@@ -22,7 +25,7 @@ function LoginForm() {
         return e;
     }
 
-    function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+    async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
         event.preventDefault();
         const form = event.currentTarget;
         const formData = new FormData(form);
@@ -32,7 +35,13 @@ function LoginForm() {
         const e = validate(email, password);
         setErrors(e);
         if (Object.keys(e).length > 0) return;
-        console.log({ email, password });
+    
+        try {
+            await login(email, password);
+            navigate("/");
+        } catch {
+            setErrors({ email: "Ongeldig emailadres of wachtwoord"});
+        }
     }
 
     return (

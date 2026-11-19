@@ -89,3 +89,9 @@ input.input-error {
     align-items: center;
     pointer-events: none;
 }
+
+.form-success {
+    font-size: 0.875rem;
+    color: var(--color-success);
+    margin: 0;
+}
