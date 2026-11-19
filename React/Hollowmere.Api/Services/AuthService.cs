@@ -20,7 +20,7 @@ public class AuthService : IAuthService
         _config = config;
     }
 
-    public async Task<AuthResponse> Register(RegisterRequest request)
+    public async Task<AuthResult> Register(RegisterRequest request)
     {
         if (await _db.Members.AnyAsync(m => m.Email == request.Email))
             throw new InvalidOperationException("Email is al in gebruik.");
@@ -34,22 +34,22 @@ public class AuthService : IAuthService
         _db.Members.Add(member);
         await _db.SaveChangesAsync();
 
-        return new AuthResponse
+        return new AuthResult
         {
-            Token = GenerateToken(member),
-            Name = member.Name
+            Name = member.Name,
+            Token = GenerateToken(member)
         };
     }
 
-    public async Task<AuthResponse> Login(LoginRequest request)
+    public async Task<AuthResult> Login(LoginRequest request)
     {
         var member = await _db.Members.FirstOrDefaultAsync(m => m.Email == request.Email);
         if (member == null || !BCrypt.Net.BCrypt.Verify(request.Password, member.PasswordHash))
             throw new UnauthorizedAccessException("Ongeldige email of wachtwoord.");
-        return new AuthResponse
+        return new AuthResult
         {
-            Token = GenerateToken(member),
-            Name = member.Name
+            Name = member.Name,
+            Token = GenerateToken(member)
         };
     }
 
@@ -61,6 +61,7 @@ public class AuthService : IAuthService
         var claims = new[]
         {
             new Claim(JwtRegisteredClaimNames.Sub, member.Id.ToString()),
+            new Claim("Name", member.Name),
             new Claim(JwtRegisteredClaimNames.Email, member.Email),
             new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
         };

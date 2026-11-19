@@ -1,4 +1,6 @@
-import { NavLink, Route, Routes, useLocation } from "react-router";
+import { AuthProvider, useAuthContext } from "./context/authContext";
+import { useAuth } from "./hooks/useAuth";
+import { NavLink, Route, Routes } from "react-router";
 import ArmoryPage from "./pages/armoryPage";
 import QuestPage from "./pages/questPage";
 import ArchivePage from "./pages/archivePage";
@@ -22,8 +24,9 @@ const navItems = [
 ];
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
-  const token = localStorage.getItem("token");
-  if (!token) return <Navigate to="/auth" replace />;
+  const { user, isLoading } = useAuthContext();
+  if (isLoading) return null;
+  if (!user) return <Navigate to="/auth" replace />;
   return <>{children}</>;
 }
 
@@ -32,8 +35,12 @@ function AppLayout() {
   const [collapsed, setCollapsed] = useState(() => window.innerWidth < 768);
   const navigate = useNavigate();
 
-  function handleLogout() {
-    localStorage.removeItem("token");
+  const { logout } = useAuth();
+  const { setUser } = useAuthContext();
+
+  async function handleLogout() {
+    await logout();
+    setUser(null);
     navigate("/auth");
   }
 
@@ -95,10 +102,12 @@ function AppLayout() {
 function App() {
   return (
     <ToastProvider>
-      <Routes>
-        <Route path="/auth" element={<AuthPage />} />
-        <Route path="/*" element={<ProtectedRoute><AppLayout /></ProtectedRoute>} />
-      </Routes>
+      <AuthProvider>
+        <Routes>
+          <Route path="/auth" element={<AuthPage />} />
+          <Route path="/*" element={<ProtectedRoute><AppLayout /></ProtectedRoute>} />
+        </Routes>
+      </AuthProvider>
     </ToastProvider>
   );
 }

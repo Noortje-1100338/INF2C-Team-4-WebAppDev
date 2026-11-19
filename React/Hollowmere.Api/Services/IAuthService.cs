@@ -4,8 +4,8 @@ namespace Hollowmere.Api.Services;
 
 public interface IAuthService
 {
-    Task<AuthResponse> Register(RegisterRequest request);
-    Task<AuthResponse> Login(LoginRequest request);
+    Task<AuthResult> Register(RegisterRequest request);
+    Task<AuthResult> Login(LoginRequest request);
 
 }
 
