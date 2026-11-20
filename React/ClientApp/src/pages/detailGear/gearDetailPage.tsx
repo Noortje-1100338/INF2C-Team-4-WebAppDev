@@ -1,14 +1,26 @@
+import { useEffect, useState } from "react";
 import { useParams } from "react-router";
 import GearDetailHeader from "../../components/armory/detail/gearDetailHeader";
 import GearDetailImage from "../../components/armory/detail/gearDetailImage";
 import GearDetailInfo from "../../components/armory/detail/gearDetailInfo";
 import GearDetailTabs from "../../components/armory/detail/gearDetailTabs";
-import { dummyGear, getGearItems } from "../../services/gearRepository";
+import { getGearItem, type GearItem } from "../../services/gearRepository";
 import "./gearDetailPage.css";
 
 function GearDetailPage() {
     const { id } = useParams();
-    const gear = [...dummyGear, ...getGearItems()].find(item => item.id === id);
+    const [gear, setGear] = useState<GearItem | null>(null);
+    const [isLoading, setIsLoading] = useState(true);
+
+    useEffect(() => {
+        setIsLoading(true);
+        getGearItem(Number(id))
+            .then(setGear)
+            .catch(() => setGear(null))
+            .finally(() => setIsLoading(false));
+    }, [id]);
+
+    if (isLoading) return <main><p>Loading...</p></main>
 
     if (!gear) {
         return <main><p>Uitrusting niet gevonden</p></main>
