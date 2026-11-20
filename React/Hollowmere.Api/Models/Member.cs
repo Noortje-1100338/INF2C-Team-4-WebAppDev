@@ -4,6 +4,8 @@ public class Member : IEntity
 {
     public int Id { get; set; }
     public string Name { get; set; } = string.Empty;
+    public string Email { get; set; } = string.Empty;
+    public string PasswordHash { get; set; } = string.Empty;
     public bool Trained { get; set; }
     public bool Quartermaster { get; set; }
 

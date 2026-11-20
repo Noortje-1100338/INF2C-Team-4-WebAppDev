@@ -53,6 +53,10 @@ function getToday(): string {
 }
 
 function formatDate(date: Date): string {
+  if (Number.isNaN(date.getTime())) {
+    return "Ongeldige datum";
+  }
+
   return new Intl.DateTimeFormat("nl-NL", {
     day: "numeric",
     month: "long",

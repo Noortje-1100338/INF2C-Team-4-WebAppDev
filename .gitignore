@@ -8,6 +8,12 @@
 *.db-shm
 *.db-wal
 
+# Uploaded Images
+React/Hollowmere.Api/wwwroot/uploads/
+
+# Local secrets
+appsettings.Development.json
+
 # User-specific files
 *.rsuser
 *.suo

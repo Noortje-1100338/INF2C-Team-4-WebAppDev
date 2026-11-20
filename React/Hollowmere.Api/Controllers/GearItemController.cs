@@ -20,6 +20,15 @@ public class GearItemController : ControllerBase
         var items = await _service.GetAllAsync();
         return Ok(items);
     }
+
+    [HttpGet("{id}")]
+    public async Task<ActionResult> GetById(int id)
+    {
+        var item = await _service.GetByIdAsync(id);
+        if (item == null)
+            return NotFound();
+        return Ok(item);
+    }
     [HttpPost]
     public async Task<IActionResult> Create(CreateGearItemRequest request)
     {
