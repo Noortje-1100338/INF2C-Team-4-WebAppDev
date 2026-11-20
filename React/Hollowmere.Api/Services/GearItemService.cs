@@ -16,22 +16,27 @@ public class GearItemService : IGearItemService
         _db = db;
         _env = env;
     }
-
-    public GearItemService(AppDbContext db)
-    {
-        _db = db;
-    }
-
     public async Task<IEnumerable<GearItemResponse>> GetAllAsync()
     {
         var items = await _db.GearItems.OrderByDescending(g => g.Id).ToListAsync();
-        return items.Select(ToResponse);
+
+        var activeLoans = await _db.Loans
+            .Where(l => l.ReturnedAt == null)
+            .Include(l => l.Member)
+            .ToDictionaryAsync(l => l.GearId, l => l.Member.Name);
+        return items.Select(item => ToResponse(item, activeLoans.GetValueOrDefault(item.Id)));
     }
 
     public async Task<GearItemResponse?> GetByIdAsync(int id)
     {
         var item = await _db.GearItems.FirstOrDefaultAsync(g => g.Id == id);
-        return item == null ? null : ToResponse(item);
+        if (item == null) return null;
+
+        var loan = await _db.Loans
+            .Include(l => l.Member)
+            .FirstOrDefaultAsync(l => l.GearId == id && l.ReturnedAt == null);
+        
+        return ToResponse(item, loan?.Member.Name);
     }
 
     public async Task<GearItemResponse> CreateAsync(CreateGearItemRequest request)
@@ -55,7 +60,7 @@ public class GearItemService : IGearItemService
 
         return ToResponse(item);
     }
-    private static GearItemResponse ToResponse(GearItem item) => new()
+    private static GearItemResponse ToResponse(GearItem item, string? loanedTo = null) => new()
         {
             Id = item.Id,
             Name = item.Name,
@@ -65,7 +70,7 @@ public class GearItemService : IGearItemService
             Dangerous = item.Dangerous,
             Retired = item.Retired,
             ImageUrl = string.IsNullOrEmpty(item.ImageUrl) ? null : item.ImageUrl,
-            LoanedTo = null
+            LoanedTo = loanedTo
         };
 
         private async Task<string> SaveImageAsync(string dataUrl)
