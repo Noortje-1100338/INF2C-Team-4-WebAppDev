@@ -21,6 +21,122 @@ cd react/hollowmere.api
 dotnet ef migrations add [naam commit]
 dotnet ef database update
 
+
+# ERD
+```mermaid
+erDiagram
+    Member {
+        int id PK
+        string name
+        boolean trained
+        boolean quartermaster
+    }
+
+    Region {
+        int id PK
+        string name
+    }
+
+    Creature {
+        int id PK
+        int regionId FK
+        string name
+        string description
+        string imageUrl
+        boolean dangerous
+    }
+
+    GearItem {
+        int id PK
+        string name
+        string kind
+        string condition
+        string description
+        boolean dangerous
+        boolean retired
+        string imageUrl
+    }
+
+    Loan {
+        int id PK
+        int gearId FK
+        int memberId FK
+        date startDate
+        date returnDate
+        string conditionNote
+    }
+
+    Quest {
+        int id PK
+        int leaderId FK
+        int creatureId FK
+        string village
+        string areaDescription
+        date departureDate
+        int durationDays
+        int partySize
+        boolean cancelled
+    }
+
+    QuestRequest {
+        int id PK
+        int questId FK
+        int memberId FK
+        boolean confirmed
+    }
+    Subject {
+        int id PK
+        string name
+    }
+    Drill {
+        int id PK
+        int subjectId FK
+        int instructorId FK
+        date date
+        boolean cancelled
+    }
+    DrillAttendance {
+        int id PK
+        int drillId FK
+        int memberId FK
+        boolean confirmed
+    }
+    YardClosure {
+        int id PK
+        date date
+    }
+    Report {
+        int id PK
+        int writerId FK
+        int regionId FK
+        date departureDate
+        string text
+        string status
+    }
+    Encounter {
+        int id PK
+        int reportId FK
+        int creatureId FK
+        string outcome
+    }
+    Member ||--o{ Loan : ""
+    GearItem ||--o{ Loan : ""
+    Member ||--o{ Quest : ""
+    Creature |o--o{ Quest : ""
+    Quest ||--o{ QuestRequest : ""
+    Member ||--o{ QuestRequest : ""
+    Region ||--o{ Creature : ""
+    Region ||--o{ Report : ""
+    Subject ||--o{ Drill : ""
+    Member ||--o{ Drill : ""
+    Drill ||--o{ DrillAttendance : ""
+    Member ||--o{ DrillAttendance : ""
+    Member ||--o{ Report : ""
+    Report ||--o{ Encounter : ""
+    Creature ||--o{ Encounter : ""
+```
+
+
 ## Case: Hollowmere
 
 Hollowmere is an adventurers' guild of about ninety members, most of them young and not yet very good at it. Their hall stands at the edge of the town. The quest board and the letter box are on the ground floor. The yard is behind the hall, the armoury is in the basement, and the archive is a chest under the stairs. Letters from the villages up the valley arrive in the letter box. Each asks for help with something: the wyvern from the marsh has learned which day the market is, and a ghost in the mill at the ford stops the wheel at midnight. The wolves of the forest road are back too, in a letter from the same farmer as last month. Whichever member gets to the letters first picks one, pins it on the board as a quest and gathers a party. The party goes, and most of the time it returns and hands its gear back to the armoury. It writes down what happened on whatever scrap of paper can be found, sometimes in runes.

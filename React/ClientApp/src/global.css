@@ -75,3 +75,31 @@ a:hover {
     margin: 0 auto;
     padding: 0 2rem;
 }
+
+.sidebar-footer {
+    margin-top: auto;
+    padding: 1rem 0.5rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.sidebar-logout {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    width: 100%;
+    padding: 0.6rem 0.75rem;
+    background: none;
+    border: none;
+    border-radius: 6px;
+    color: white;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 0.9rem;
+    opacity: 0.7;
+    transition: opacity 0.15s, background 0.15s;
+}
+
+.sidebar-logout:hover {
+    color: var(--color-primary-hover);
+    background: none;
+}
