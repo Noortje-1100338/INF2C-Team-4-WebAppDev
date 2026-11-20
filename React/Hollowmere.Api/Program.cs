@@ -51,6 +51,8 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 
 builder.Services.AddScoped<IGearItemService, GearItemService>();
 
+builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
+
 builder.Services.AddScoped<IReportRepository, ReportRepository>();
 
 builder.Services.AddScoped<IReportService, ReportService>();

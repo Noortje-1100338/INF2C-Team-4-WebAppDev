@@ -4,7 +4,7 @@ namespace Hollowmere.Api.Repositories;
 
 public interface IReportRepository
 {
-    Task<List>Report>> GetAllAsync();
+    Task<List<Report>> GetAllAsync();
     Task<Report?> GetIdByAsync(int id);
     void Add(Report report);
     Task<int> SaveChangesAsync();

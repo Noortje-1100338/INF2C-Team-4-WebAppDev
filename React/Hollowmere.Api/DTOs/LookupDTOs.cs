@@ -1,4 +1,4 @@
-namespace Hollowmere.Api.DTO's;
+namespace Hollowmere.Api.DTOs;
 
 public class RegionResponse
 {
@@ -10,6 +10,6 @@ public class RegionResponse
 public class CreatureResponse
 {
     public int Id { get; set; }
-    public string Name { get; set; } = string.Empty
-    public string RegionName { get; set; } = string.Empty 
+    public string Name { get; set; } = string.Empty;
+    public string RegionName { get; set; } = string.Empty;
 }

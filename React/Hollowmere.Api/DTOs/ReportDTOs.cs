@@ -1,4 +1,4 @@
-namespace Hollowmere.Api.DTO's;
+namespace Hollowmere.Api.DTOs;
 
 public class ReportResponse
 {
@@ -10,28 +10,28 @@ public class ReportResponse
     public string DepartureDate { get; set; } = string.Empty;
     public string Text { get; set; } = string.Empty;
     public string Status { get; set; } = string.Empty;
-    public List<EncounterResponse> Encounters { get; set; } = new()    
+    public List<EncounterResponse> Encounters { get; set; } = new();    
 }
 
 public class EncounterResponse
 {
     public int Id { get; set; }
     public int CreatureId { get; set; }
-    public string CreatureName { get; set; }
+    public string CreatureName { get; set; } = string.Empty;
     public string Outcome { get; set; } = string.Empty;
 }
 
-public class CreatureReportRequest
+public class CreateReportRequest
 {
     public int WriterId { get; set; }
     public int RegionId { get; set; }
     public string DepartureDate { get; set; } = string.Empty;
     public string Text { get; set; } = string.Empty;
-    public List<CreateEncounter<Request> Encounters { get; set; } = new();
+    public List<CreateEncounterRequest> Encounters { get; set; } = new();
 }
 
 
-public class CreateEncounterRequest()
+public class CreateEncounterRequest
 {
     public int CreatureId { get; set; }
     public string Outcome { get; set; } = string.Empty;
@@ -40,5 +40,5 @@ public class CreateEncounterRequest()
 
 public class UpdateReportStatusRequest
 {
-    public string Status { get; set; } = string.Empty
+    public string Status { get; set; } = string.Empty;
 }
