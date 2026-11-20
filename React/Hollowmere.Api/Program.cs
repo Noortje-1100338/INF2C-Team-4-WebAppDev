@@ -4,6 +4,7 @@ using Hollowmere.Api.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using Microsoft.Extensions.FileProviders;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -91,6 +92,15 @@ if (app.Environment.IsDevelopment())
 
 
 app.UseHttpsRedirection();
+
+var uploadsPath = Path.Combine(app.Environment.ContentRootPath, "wwwroot", "uploads");
+Directory.CreateDirectory(uploadsPath);
+
+app.UseStaticFiles(new StaticFileOptions
+{
+    FileProvider = new PhysicalFileProvider(uploadsPath),
+    RequestPath = "/uploads"
+});
 
 app.UseCors();
 
