@@ -30,7 +30,7 @@ public class ReportRepository : IReportRepository
 
     public void Add(Report report) => _context.Reports.Add(report);
 
-    public Task<int> SaveChangesAsync() => _context.SaveChangesAsync();3
+    public Task<int> SaveChangesAsync() => _context.SaveChangesAsync();
     
 
 }

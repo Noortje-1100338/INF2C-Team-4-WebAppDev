@@ -11,22 +11,22 @@ public class Repository<T> : IRepository<T> where T : class, IEntity
 
     public Repository(AppDbContext context)
     {
-        _context = Context
+        _context = context;
     }
 
-    public async Task<List><T>> GetAllAsync(params Expression<Func<T, object>>[] includes)
+    public async Task<List<T>> GetAllAsync(params Expression<Func<T, object>>[] includes)
     {
         IQueryable<T> query = _context.Set<T>();
         foreach (var include in includes)
             query = query.Include(include);
-        returen await query.ToListAsync();        
+        return await query.ToListAsync();        
     }
 
     public async Task<T?> GetIdByAsync(int id, params Expression<Func<T, object>>[] includes)
     {
         IQueryable<T> query = _context.Set<T>();
         foreach (var include in includes)
-            query = query.Include(Include);
+            query = query.Include(include);
         return await query.FirstOrDefaultAsync(e => e.Id == id);
     }
 
