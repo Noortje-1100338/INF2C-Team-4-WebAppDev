@@ -23,13 +23,13 @@ export interface CreateGearItemRequest {
 const API_BASE = '/api/gearItem';
 
 export async function getGearItems(): Promise<GearItem[]> {
-    const res = await fetch (API_BASE);
+    const res = await fetch (API_BASE, { credentials: 'include' });
     if (!res.ok) throw new Error ('Failed to fetch gear items');
     return res.json();
 }
 
 export async function getGearItem(id: number): Promise<GearItem | null> {
-    const res = await fetch(`${API_BASE}/${id}`);
+    const res = await fetch(`${API_BASE}/${id}`, { credentials: 'include' });
     if (res.status === 404) return null;
     if (!res.ok) throw new Error('Failed to fetch gear item');
     return res.json();
@@ -41,6 +41,7 @@ export async function saveGearItem(request: CreateGearItemRequest): Promise<Gear
         headers: {
             'Content-Type': 'application/json'
         },
+        credentials: 'include',
         body: JSON.stringify(request)
     });
     if (!res.ok) throw new Error('Failed to save gear item');

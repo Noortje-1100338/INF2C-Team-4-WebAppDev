@@ -39,8 +39,12 @@ public class GearItemService : IGearItemService
         return ToResponse(item, loan?.Member.Name);
     }
 
-    public async Task<GearItemResponse> CreateAsync(CreateGearItemRequest request)
+    public async Task<GearItemResponse> CreateAsync(CreateGearItemRequest request, int memberId)
     {
+        var member = await _db.Members.FirstOrDefaultAsync(m => m.Id == memberId);
+        if (member is null or { Quartermaster: false })
+            throw new InvalidOperationException("Alleen kwartiermeesters kunnen uitrusting toevoegen.");
+            
         var imageUrl = string.IsNullOrEmpty(request.ImageUrl)
             ? string.Empty
             : await SaveImageAsync(request.ImageUrl);

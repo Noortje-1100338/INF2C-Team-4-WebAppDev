@@ -6,5 +6,5 @@ public interface IGearItemService
 {
     Task<IEnumerable<GearItemResponse>> GetAllAsync();
     Task<GearItemResponse?> GetByIdAsync(int id);
-    Task<GearItemResponse> CreateAsync(CreateGearItemRequest request);
+    Task<GearItemResponse> CreateAsync(CreateGearItemRequest request, int memberId);
 }
