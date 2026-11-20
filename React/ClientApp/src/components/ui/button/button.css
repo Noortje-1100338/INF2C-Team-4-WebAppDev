@@ -87,6 +87,26 @@
     border-color: var(--color-success-hover);
 }
 
+.btn-spinner {
+    width: 0.9em;
+    height: 0.9em;
+    margin-right: 0.5rem;
+    border: 2px solid currentColor;
+    border-right-color: transparent;
+    border-radius: 50%;
+    animation: btn-spin 0.6s linear infinite;
+    flex-shrink: 0;
+}
+
+@keyframes btn-spin {
+    to { transform: rotate(360deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .btn-spinner {
+        animation-duration: 2s;
+    }
+}
 
 @media (max-width: 480px) {
     .btn {

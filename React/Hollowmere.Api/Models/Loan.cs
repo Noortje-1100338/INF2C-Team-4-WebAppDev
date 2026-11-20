@@ -8,7 +8,6 @@ public class Loan : IEntity
     public DateTime StartDate { get; set; }
     public DateTime DueDate { get; set; }
     public DateTime? ReturnedAt { get; set; }
-    public string ConditionNote { get; set; } = string.Empty;
 
     public GearItem Gear { get; set; } = null!;
     public Member Member { get; set; } = null!;

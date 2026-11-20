@@ -168,10 +168,6 @@ namespace Hollowmere.Api.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<string>("ConditionNote")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
                     b.Property<DateTime>("DueDate")
                         .HasColumnType("TEXT");
 

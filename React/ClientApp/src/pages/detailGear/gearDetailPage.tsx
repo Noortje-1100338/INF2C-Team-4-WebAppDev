@@ -1,5 +1,8 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router";
+import Modal from "../../components/ui/modal/modal";
+import useModal from "../../hooks/useModal";
+import LoanForm from "../../components/armory/loanForm";
 import GearDetailHeader from "../../components/armory/detail/gearDetailHeader";
 import GearDetailImage from "../../components/armory/detail/gearDetailImage";
 import GearDetailInfo from "../../components/armory/detail/gearDetailInfo";
@@ -9,8 +12,15 @@ import "./gearDetailPage.css";
 
 function GearDetailPage() {
     const { id } = useParams();
+    const { isOpen, openModal, closeModal } = useModal();
     const [gear, setGear] = useState<GearItem | null>(null);
     const [isLoading, setIsLoading] = useState(true);
+
+
+    function handleLoaned() {
+        closeModal();
+        getGearItem(Number(id)).then(setGear).catch(() => {});
+    }
 
     useEffect(() => {
         setIsLoading(true);
@@ -31,9 +41,17 @@ function GearDetailPage() {
             
             <div className="gear-detail-content">
                 <GearDetailImage gear={gear} />
-                <GearDetailInfo gear={gear} />
+                <GearDetailInfo gear={gear} onLoanClick={openModal} />
             </div>
             <GearDetailTabs />
+
+            <Modal isOpen={isOpen}
+                onClose={closeModal}
+                eyebrow="Uitrusting"
+                title="Uitrusting lenen"
+            >
+                <LoanForm gearId={Number(id)} onCancel={closeModal} onLoaned={handleLoaned} />
+            </Modal>
         </main>
     )
 }

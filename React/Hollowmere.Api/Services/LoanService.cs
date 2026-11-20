@@ -33,6 +33,12 @@ public class LoanService : ILoanService
             throw new InvalidOperationException("Uitrusting niet gevonden.");
         if (gear.Retired)
             throw new InvalidOperationException("Deze uitrusting is uit gebruik genomen.");
+        var member = await _db.Members.FirstOrDefaultAsync(m => m.Id == memberId);
+        
+        if (member == null)
+            throw new InvalidOperationException("Lid niet gevonden.");
+        if (gear.Dangerous && !member.Trained)
+            throw new InvalidOperationException("Deze uitrusting is gevaarlijk en het lid is niet getraind om deze uitrusting te gebruiken.");
 
         var alreadyLoaned = await _db.Loans
             .AnyAsync(l => l.GearId == request.GearId && l.ReturnedAt == null);
@@ -47,8 +53,7 @@ public class LoanService : ILoanService
             GearId = request.GearId,
             MemberId = memberId,
             StartDate = DateTime.UtcNow,
-            DueDate = request.DueDate,
-            ConditionNote = request.ConditionNote
+            DueDate = request.DueDate
         };
 
         _db.Loans.Add(loan);
@@ -70,6 +75,5 @@ public class LoanService : ILoanService
         StartDate = loan.StartDate,
         DueDate = loan.DueDate,
         ReturnedAt = loan.ReturnedAt,
-        ConditionNote = loan.ConditionNote,
     };
 }

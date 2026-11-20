@@ -5,6 +5,7 @@ import { ArrowRight, ShieldCheck } from "lucide-react";
 
 interface GearDetailInfoProps {
     gear: GearItem;
+    onLoanClick: () => void;
 }
 
 
@@ -15,7 +16,7 @@ const conditionLabels: Record<string, string> = {
     damaged: "Beschadigd",
 }
 
-function GearDetailInfo({ gear }: GearDetailInfoProps) {
+function GearDetailInfo({ gear, onLoanClick }: GearDetailInfoProps) {
     return (
         <section className="gear-detail-info" aria-labelledby="gear-detail-info-title">
             <h2 id="gear-detail-info-title">Gegevens</h2>
@@ -65,7 +66,7 @@ function GearDetailInfo({ gear }: GearDetailInfoProps) {
             </div>
             
             <div className="gear-detail-loan">
-                <Button type="button" variant="primary" fullWidth className="gear-detail-loan-button">
+                <Button type="button" variant="primary" fullWidth className="gear-detail-loan-button" onClick={onLoanClick} disabled={gear.retired || gear.loanedTo !== null}>
                     <span>Uitrusting Lenen</span>
                     <ArrowRight className="gear-detail-loan-icon" size={18} strokeWidth={1.8} aria-hidden="true" />
                 </Button>

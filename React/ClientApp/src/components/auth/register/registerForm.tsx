@@ -107,7 +107,7 @@ function RegisterForm({ onSuccess }: { onSuccess: () => void}) {
                     </button>
                 </div>
             </div>
-            <Button type="submit" disabled={isLoading}>{ isLoading ? "Bezig...": "Registreren" }</Button>
+            <Button type="submit" loading={isLoading}>Registreren</Button>
         </form>
     )
 }
