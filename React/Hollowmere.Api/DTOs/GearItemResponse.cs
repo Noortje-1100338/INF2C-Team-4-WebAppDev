@@ -11,4 +11,6 @@ public class GearItemResponse
     public bool Retired { get; set; }
     public string? ImageUrl { get; set; }
     public string? LoanedTo { get; set; }
+    public int? LoanedToMemberId { get; set; }
+    public int? ActiveLoanId { get; set; }
 }

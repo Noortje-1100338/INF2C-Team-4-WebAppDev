@@ -40,6 +40,20 @@ public class LoanController : ControllerBase
         }
     }
 
+    [HttpPost("{id}/return")]
+    public async Task<IActionResult> Return(int id, ReturnLoanRequest request)
+    {
+        try
+        {
+            var loan = await _service.ReturnAsync(id, request, GetMemberId());
+            return Ok(loan);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+    }
+
     private int GetMemberId()
     {
         return int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);

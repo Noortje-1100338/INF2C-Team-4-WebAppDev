@@ -10,4 +10,5 @@ public class LoanResponse
     public DateTime StartDate { get; set; }
     public DateTime DueDate { get; set; }
     public DateTime? ReturnedAt { get; set; }
+    public string ConditionNote { get; set; } = string.Empty;
 }

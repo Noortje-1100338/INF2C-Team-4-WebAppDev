@@ -36,7 +36,10 @@ public class AuthService : IAuthService
 
         return new AuthResult
         {
+            Id = member.Id,
             Name = member.Name,
+            Trained = member.Trained,
+            Quartermaster = member.Quartermaster,
             Token = GenerateToken(member)
         };
     }
@@ -48,8 +51,25 @@ public class AuthService : IAuthService
             throw new UnauthorizedAccessException("Ongeldige email of wachtwoord.");
         return new AuthResult
         {
+            Id = member.Id,
             Name = member.Name,
+            Trained = member.Trained,
+            Quartermaster = member.Quartermaster,
             Token = GenerateToken(member)
+        };
+    }
+
+    public async Task<AuthResponse?> GetByIdAsync(int memberId)
+    {
+        var member = await _db.Members.FirstOrDefaultAsync(m => m.Id == memberId);
+        if (member == null) return null;
+
+        return new AuthResponse
+        {
+            Id = member.Id,
+            Name = member.Name,
+            Trained = member.Trained,
+            Quartermaster = member.Quartermaster
         };
     }
 

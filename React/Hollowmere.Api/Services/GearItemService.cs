@@ -1,50 +1,47 @@
 using Hollowmere.Api.Models;
 using Hollowmere.Api.DTOs;
-using Hollowmere.Api.Data;
-using Microsoft.EntityFrameworkCore;
+using Hollowmere.Api.Repositories;
 using System.Text.RegularExpressions;
 
 namespace Hollowmere.Api.Services;
 
 public class GearItemService : IGearItemService
 {
-    private readonly AppDbContext _db;
+    private readonly IGearItemRepository _gear;
+    private readonly IRepository<Member> _members;
     private readonly IWebHostEnvironment _env;
+    private readonly ILoanRepository _loans;
 
-    public GearItemService(AppDbContext db, IWebHostEnvironment env)
+    public GearItemService(IGearItemRepository gear, IRepository<Member> members, IWebHostEnvironment env, ILoanRepository loans)
     {
-        _db = db;
+        _gear = gear;
+        _members = members;
         _env = env;
+        _loans = loans;
     }
     public async Task<IEnumerable<GearItemResponse>> GetAllAsync()
     {
-        var items = await _db.GearItems.OrderByDescending(g => g.Id).ToListAsync();
+        var items = await _gear.GetAllAsync();
 
-        var activeLoans = await _db.Loans
-            .Where(l => l.ReturnedAt == null)
-            .Include(l => l.Member)
-            .ToDictionaryAsync(l => l.GearId, l => l.Member.Name);
+        var activeLoans = (await _loans.GetActiveAsync()).ToDictionary(l => l.GearId);
         return items.Select(item => ToResponse(item, activeLoans.GetValueOrDefault(item.Id)));
     }
 
     public async Task<GearItemResponse?> GetByIdAsync(int id)
     {
-        var item = await _db.GearItems.FirstOrDefaultAsync(g => g.Id == id);
+        var item = await _gear.GetByIdAsync(id);
         if (item == null) return null;
 
-        var loan = await _db.Loans
-            .Include(l => l.Member)
-            .FirstOrDefaultAsync(l => l.GearId == id && l.ReturnedAt == null);
-        
-        return ToResponse(item, loan?.Member.Name);
+        var loan = await _loans.GetActiveForGearAsync(id);
+        return ToResponse(item, loan);
     }
 
     public async Task<GearItemResponse> CreateAsync(CreateGearItemRequest request, int memberId)
     {
-        var member = await _db.Members.FirstOrDefaultAsync(m => m.Id == memberId);
+        var member = await _members.GetIdByAsync(memberId);
         if (member is null or { Quartermaster: false })
             throw new InvalidOperationException("Alleen kwartiermeesters kunnen uitrusting toevoegen.");
-            
+
         var imageUrl = string.IsNullOrEmpty(request.ImageUrl)
             ? string.Empty
             : await SaveImageAsync(request.ImageUrl);
@@ -59,12 +56,12 @@ public class GearItemService : IGearItemService
             ImageUrl = imageUrl
         };
 
-        _db.GearItems.Add(item);
-        await _db.SaveChangesAsync();
+        _gear.Add(item);
+        await _gear.SaveChangesAsync();
 
         return ToResponse(item);
     }
-    private static GearItemResponse ToResponse(GearItem item, string? loanedTo = null) => new()
+    private static GearItemResponse ToResponse(GearItem item, Loan? loan = null) => new()
         {
             Id = item.Id,
             Name = item.Name,
@@ -74,7 +71,9 @@ public class GearItemService : IGearItemService
             Dangerous = item.Dangerous,
             Retired = item.Retired,
             ImageUrl = string.IsNullOrEmpty(item.ImageUrl) ? null : item.ImageUrl,
-            LoanedTo = loanedTo
+            LoanedTo = loan?.Member.Name,
+            LoanedToMemberId = loan?.MemberId,
+            ActiveLoanId = loan?.Id
         };
 
         private async Task<string> SaveImageAsync(string dataUrl)

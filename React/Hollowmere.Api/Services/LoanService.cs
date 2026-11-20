@@ -1,52 +1,51 @@
-using Hollowmere.Api.Data;
 using Hollowmere.Api.DTOs;
 using Hollowmere.Api.Models;
-using Microsoft.EntityFrameworkCore;
+using Hollowmere.Api.Repositories;
 
 namespace Hollowmere.Api.Services;
 
+
 public class LoanService : ILoanService
 {
-    private readonly AppDbContext _db;
+    private readonly ILoanRepository _loans;
+    private readonly IRepository<GearItem> _gear;
+    private readonly IRepository<Member> _members;
 
-    public LoanService(AppDbContext db)
+    public LoanService(ILoanRepository loans, IRepository<GearItem> gear, IRepository<Member> members)
     {
-        _db = db;
+        _loans = loans;
+        _gear = gear;
+        _members = members;
     }
-
 
     public async Task<IEnumerable<LoanResponse>> GetAllAsync()
     {
-        var loans = await _db.Loans
-            .Include(l => l.Gear)
-            .Include(l => l.Member)
-            .OrderByDescending(l => l.StartDate)
-            .ToListAsync();
-
+        var loans = await _loans.GetAllAsync();
         return loans.Select(ToResponse);
     }
 
     public async Task<LoanResponse> CreateAsync(CreateLoanRequest request, int memberId)
     {
-        var gear = await _db.GearItems.FirstOrDefaultAsync(g => g.Id == request.GearId);
+        var gear = await _gear.GetIdByAsync(request.GearId);
         if (gear == null)
             throw new InvalidOperationException("Uitrusting niet gevonden.");
         if (gear.Retired)
-            throw new InvalidOperationException("Deze uitrusting is uit gebruik genomen.");
-        var member = await _db.Members.FirstOrDefaultAsync(m => m.Id == memberId);
-        
+            throw new InvalidOperationException("Uitrusting is met pensioen.");
+
+        var member = await _members.GetIdByAsync(memberId);
         if (member == null)
             throw new InvalidOperationException("Lid niet gevonden.");
         if (gear.Dangerous && !member.Trained)
-            throw new InvalidOperationException("Deze uitrusting is gevaarlijk en het lid is niet getraind om deze uitrusting te gebruiken.");
+            throw new InvalidOperationException("Lid is niet getraind voor gevaarlijke uitrusting.");
 
-        var alreadyLoaned = await _db.Loans
-            .AnyAsync(l => l.GearId == request.GearId && l.ReturnedAt == null);
-        if (alreadyLoaned)
-            throw new InvalidOperationException("Deze uitrusting is al uitgeleend.");
+        var activeLoan = await _loans.GetActiveForGearAsync(request.GearId);
+        if (activeLoan != null)
+            throw new InvalidOperationException(activeLoan.MemberId == memberId
+            ? "Uitrusting is al in uw bezit."
+            : "Uitrusting is al uitgeleend aan een ander lid.");
         
         if (request.DueDate <= DateTime.UtcNow)
-            throw new InvalidOperationException("De inleverdatum moet in de toekomst liggen.");
+            throw new InvalidOperationException("Inleverdatum moet in de toekomst liggen.");
         
         var loan = new Loan
         {
@@ -55,12 +54,29 @@ public class LoanService : ILoanService
             StartDate = DateTime.UtcNow,
             DueDate = request.DueDate
         };
+        _loans.Add(loan);
+        await _loans.SaveChangesAsync();
 
-        _db.Loans.Add(loan);
-        await _db.SaveChangesAsync();
+        var saved = await _loans.GetByIdAsync(loan.Id);
+        return ToResponse(saved!);
+    }
 
-        await _db.Entry(loan).Reference(l => l.Gear).LoadAsync();
-        await _db.Entry(loan).Reference(l => l.Member).LoadAsync();
+    public async Task<LoanResponse> ReturnAsync(int loanId, ReturnLoanRequest request, int memberId)
+    {
+        var loan = await _loans.GetByIdAsync(loanId);
+        if (loan == null)
+            throw new InvalidOperationException("Lening niet gevonden.");
+        if (loan.ReturnedAt != null)
+            throw new InvalidOperationException("Uitrusting is al ingeleverd.");
+        
+        var member = await _members.GetIdByAsync(memberId);
+        if (member == null)
+            throw new InvalidOperationException("Lid niet gevonden.");
+        if (loan.MemberId != memberId && !member.Quartermaster)
+            throw new InvalidOperationException("Alleen quatermaster of de lener mag deze lening inleveren.");
+        loan.ReturnedAt = DateTime.UtcNow;
+        loan.ConditionNote = request.ConditionNote;
+        await _loans.SaveChangesAsync();
 
         return ToResponse(loan);
     }
@@ -75,5 +91,6 @@ public class LoanService : ILoanService
         StartDate = loan.StartDate,
         DueDate = loan.DueDate,
         ReturnedAt = loan.ReturnedAt,
+        ConditionNote = loan.ConditionNote
     };
 }
