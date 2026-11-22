@@ -26,6 +26,11 @@ public class LoanRepository : ILoanRepository
 
     public async Task<Loan?> GetActiveForGearAsync(int gearId) => await LoansWithDetails().FirstOrDefaultAsync(l => l.GearId == gearId && l.ReturnedAt == null);
 
+    public async Task<bool> HasOverdueLoanAsync(int memberId, DateTime now) => await _context.Loans.AnyAsync(l => l.MemberId == memberId && l.ReturnedAt == null && l.DueDate < now);
+
+    public async Task<int> CountLateReturnsSinceAsync(int memberId, DateTime since) => await _context.Loans.CountAsync(l => l.MemberId == memberId && l.ReturnedAt != null
+    && l.ReturnedAt > l.DueDate && l.ReturnedAt >= since);
+
     public void Add(Loan loan) => _context.Loans.Add(loan);
 
     public async Task<int> SaveChangesAsync() => await _context.SaveChangesAsync();

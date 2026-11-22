@@ -2,6 +2,7 @@ using Hollowmere.Api.Data;
 using Microsoft.EntityFrameworkCore;
 using Hollowmere.Api.Services;
 using Hollowmere.Api.Repositories;
+using Hollowmere.Api.Configuration;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
@@ -79,6 +80,8 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 builder.Services.AddScoped<ILoanService, LoanService>();
+
+builder.Services.Configure<LoanPolicyOptions>(builder.Configuration.GetSection(LoanPolicyOptions.SectionName));
 
 var app = builder.Build();
 

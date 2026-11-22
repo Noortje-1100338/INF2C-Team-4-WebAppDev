@@ -1,7 +1,7 @@
 import type { GearItem } from "../../../services/gearRepository";
 import "./gearDetailInfo.css";
 import Button from "../../ui/button/button";
-import { ArrowRight, ShieldCheck } from "lucide-react";
+import { ArrowRight, ShieldCheck, ShieldAlert} from "lucide-react";
 import { useAuthContext } from "../../../context/authContext";
 
 interface GearDetailInfoProps {
@@ -22,7 +22,8 @@ function GearDetailInfo({ gear, onLoanClick, onReturnClick }: GearDetailInfoProp
     const { user } = useAuthContext();
     const isOnLoan = gear.loanedTo != null;
     const mayReturn = isOnLoan && (gear.loanedToMemberId === user?.id || user?.quartermaster === true);
-    
+    const needsTraining = gear.dangerous && !user?.trained;
+
     return (
         <section className="gear-detail-info" aria-labelledby="gear-detail-info-title">
             <h2 id="gear-detail-info-title">Gegevens</h2>
@@ -57,15 +58,18 @@ function GearDetailInfo({ gear, onLoanClick, onReturnClick }: GearDetailInfoProp
 
             <div className="gear-detail-training">
                 <div className="gear-detail-training-content">
-                    <ShieldCheck className="gear-detail-training-icon" size={18} strokeWidth={1.8} aria-hidden="true"/>
-                
+                    {needsTraining
+                        ? <ShieldAlert className="gear-detail-training-icon" size={18} strokeWidth={1.8} aria-hidden="true" />
+                        : <ShieldCheck className="gear-detail-training-icon" size={18} strokeWidth={1.8} aria-hidden="true" />
+                    }
                     <div className="gear-detail-training-text">
                         <div className="gear-detail-training-title">
-                            <h3>Geen training vereist</h3>
+                            <h3>{gear.dangerous ? "Training vereist" : "Geen training vereist"}</h3>
                         </div>
 
                         <div className="gear-detail-training-description">
-                            <p>Deze uitrusting kan zonder training gebruikt worden.</p>
+                            <p> {!gear.dangerous ? "Deze uitrusting kan zonder training gebruikt worden." : needsTraining ? "Je bent nog niet getraind. Volg eerst een drill in de yard."
+                            : "Je bent getraind en mag deze uitrusting lenen"}</p>
                         </div>
                     </div>
                 </div>
@@ -78,7 +82,7 @@ function GearDetailInfo({ gear, onLoanClick, onReturnClick }: GearDetailInfoProp
                         <ArrowRight className="gear-detail-loan-icon" size={18} strokeWidth={1.8} aria-hidden="true" />
                     </Button>
                 ) : (
-                    <Button type="button" variant="primary" fullWidth className="gear-detail-loan-button" onClick={onLoanClick} disabled={gear.retired || gear.loanedTo !== null}>
+                    <Button type="button" variant="primary" fullWidth className="gear-detail-loan-button" onClick={onLoanClick} disabled={gear.retired || gear.loanedTo !== null || needsTraining}>
                         <span>Uitrusting Lenen</span>
                         <ArrowRight className="gear-detail-loan-icon" size={18} strokeWidth={1.8} aria-hidden="true" />
                     </Button>
