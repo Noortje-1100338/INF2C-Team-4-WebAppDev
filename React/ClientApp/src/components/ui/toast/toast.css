@@ -116,6 +116,15 @@
     background-color: rgba(255, 255, 255, 0.1);
 }
 
+.toast:not(:has(.toast-message)) {
+    align-items: center;
+}
+
+.toast:not(:has(.toast-message)) .toast-icon,
+.toast:not(:has(.toast-message)) .toast-close {
+    margin-top: 0;
+}
+
 @keyframes toast-in {
     from {
         opacity: 0;
