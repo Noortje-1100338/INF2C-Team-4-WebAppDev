@@ -1,5 +1,12 @@
+export interface AuthUser {
+    id: number;
+    name: string;
+    trained: boolean;
+    quartermaster: boolean;
+}
+
 export function useAuth() {
-    async function login(email: string, password: string) {
+    async function login(email: string, password: string): Promise<AuthUser> {
         const response = await fetch("http://localhost:5043/api/auth/login", {
             method: "POST",
             headers: {
@@ -13,7 +20,7 @@ export function useAuth() {
         return await response.json();
     }
 
-    async function register(name: string, email: string, password: string) {
+    async function register(name: string, email: string, password: string): Promise<AuthUser> {
         const response = await fetch("http://localhost:5043/api/auth/register", {
             method: "POST",
             headers: {
@@ -34,13 +41,12 @@ export function useAuth() {
         });
     }
 
-    async function me() {
+    async function me(): Promise<AuthUser> {
         const response = await fetch("http://localhost:5043/api/auth/me", {
             credentials: "include"
         });
         if (!response.ok) throw new Error("Niet ingelogd");
-        return await response.json() as { name: string, email: string };
-    }
+        return await response.json();}
 
     return { login, register, logout, me };
 }

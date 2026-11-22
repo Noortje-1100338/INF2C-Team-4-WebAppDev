@@ -7,6 +7,7 @@ export interface Loan {
     startDate: string;
     dueDate: string;
     returnedAt: string | null;
+    conditionNote: string;
 }
 
 export interface CreateLoanRequest {
@@ -32,6 +33,20 @@ export async function createLoan(request: CreateLoanRequest): Promise<Loan> {
     if (!res.ok) {
         const error = await res.json().catch(() => null);
         throw new Error(error?.message ?? 'Lenen mislukt');
+    }
+    return res.json();
+}
+
+export async function returnLoan(id: number, conditionNote: string): Promise<Loan> {
+    const res = await fetch(`${API_BASE}/${id}/return`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ conditionNote }),
+    });
+    if (!res.ok) {
+        const error = await res.json().catch(() => null);
+        throw new Error(error?.message ?? 'Inleveren mislukt');
     }
     return res.json();
 }

@@ -8,6 +8,8 @@ export interface GearItem {
     retired: boolean;
     loanedTo: string | null;
     imageUrl?: string;
+    loanedToMemberId: number | null;
+    activeLoanId: number | null;
 }
 
 export interface CreateGearItemRequest {
@@ -44,6 +46,9 @@ export async function saveGearItem(request: CreateGearItemRequest): Promise<Gear
         credentials: 'include',
         body: JSON.stringify(request)
     });
-    if (!res.ok) throw new Error('Failed to save gear item');
+    if (!res.ok) {
+        const error = await res.json().catch(() => null);
+        throw new Error(error?.message ?? 'Failed to save gear item');
+    } 
     return res.json();
 }

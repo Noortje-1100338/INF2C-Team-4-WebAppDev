@@ -36,7 +36,7 @@ public class LoanService : ILoanService
         if (member == null)
             throw new InvalidOperationException("Lid niet gevonden.");
         if (gear.Dangerous && !member.Trained)
-            throw new InvalidOperationException("Lid is niet getraind voor gevaarlijke uitrusting.");
+            throw new InvalidOperationException("Je bent nog niet getraind voor gevaarlijke uitrusting.");
 
         var activeLoan = await _loans.GetActiveForGearAsync(request.GearId);
         if (activeLoan != null)

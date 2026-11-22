@@ -24,6 +24,16 @@ public static class DbSeeder
     db.Members.AddRange(
         members.Where(member => !existingMemberIds.Contains(member.Id)));
 
+    if (!await db.Members.AnyAsync(m => m.Email == "quartermaster@hollowmere.test"))
+        db.Members.Add(new Member
+        {
+            Name = "Quartermaster",
+            Email = "quartermaster@hollowmere.test",
+            PasswordHash = BCrypt.Net.BCrypt.HashPassword("quartermaster"),
+            Trained = true,
+            Quartermaster = true
+        });
+
     var regions = new[]
     {
             new Region { Id = 1, Name = "Swamp" },
