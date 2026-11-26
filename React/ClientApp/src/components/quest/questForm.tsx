@@ -43,14 +43,24 @@ function QuestForm({ member, initialQuest, onCancel, onSave }: QuestFormProps) {
     Boolean(initialQuest?.creatureId),
   );
   const [error, setError] = useState("");
+  const [isSaving, setIsSaving] = useState(false);
   const isEditing = Boolean(initialQuest);
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>): void {
+  async function handleSubmit(
+    event: FormEvent<HTMLFormElement>,
+  ): Promise<void> {
     event.preventDefault();
 
     const formData = new FormData(event.currentTarget);
-    const saveError = onSave(getQuestDetails(formData, hasCreature));
-    setError(saveError ?? "");
+    setIsSaving(true);
+    try {
+      const saveError = await onSave(getQuestDetails(formData, hasCreature));
+      setError(saveError ?? "");
+    } catch {
+      setError("Opslaan is niet gelukt.");
+    } finally {
+      setIsSaving(false);
+    }
   }
 
   return (
