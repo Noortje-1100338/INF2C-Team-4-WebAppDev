@@ -15,6 +15,7 @@ interface QuestOverviewProps {
   onConfirm: (questId: number, requestId: number) => void;
   onEdit: (quest: Quest) => void;
   onCancelQuest: (quest: Quest) => void;
+  onDelete: (quest: Quest) => void;
   onTransfer: (questId: number, memberId: number) => void;
 }
 
@@ -26,6 +27,7 @@ interface QuestCardProps {
   onConfirm: (questId: number, requestId: number) => void;
   onEdit: (quest: Quest) => void;
   onCancelQuest: (quest: Quest) => void;
+  onDelete: (quest: Quest) => void;
   onTransfer: (questId: number, memberId: number) => void;
 }
 
@@ -81,6 +83,7 @@ function QuestCard({
   onConfirm,
   onEdit,
   onCancelQuest,
+  onDelete,
   onTransfer,
 }: QuestCardProps) {
   const [newLeaderId, setNewLeaderId] = useState<number | null>(null);
@@ -91,10 +94,7 @@ function QuestCard({
   );
   const usedPlaces = confirmedRequests.length + 1;
   const freePlaces = Math.max(quest.partySize - usedPlaces, 0);
-  const partyFill = Math.min(
-    (usedPlaces / quest.partySize) * 100,
-    100,
-  );
+  const partyFill = Math.min((usedPlaces / quest.partySize) * 100, 100);
   const currentRequest = quest.requests.find(
     (request) => request.memberId === currentMember.id,
   );
@@ -236,15 +236,24 @@ function QuestCard({
         <Button onClick={() => onRequest(quest.id)}>Vraag een plek aan</Button>
       )}
 
-      {isLeader && !quest.cancelled && (
+      {isLeader && (
         <div className="quest-leader-actions">
-          <Button variant="secondary" onClick={() => onEdit(quest)}>
-            Quest wijzigen
+          {!quest.cancelled && (
+            <>
+              <Button variant="secondary" onClick={() => onEdit(quest)}>
+                {" "}
+                Quest wijzigen
+              </Button>
+              <Button variant="danger" onClick={() => onCancelQuest(quest)}>
+                Quest annuleren
+              </Button>
+            </>
+          )}
+          <Button variant="danger" onClick={() => onDelete(quest)}>
+            Quest verwijderen
           </Button>
-          <Button variant="danger" onClick={() => onCancelQuest(quest)}>
-            Quest annuleren
-          </Button>
-          {availableMembers.length > 0 && (
+
+          {!quest.cancelled && availableMembers.length > 0 && (
             <div className="quest-transfer">
               <label htmlFor={`transfer-${quest.id}`}>
                 Leiderschap overdragen
@@ -253,7 +262,9 @@ function QuestCard({
                 <select
                   id={`transfer-${quest.id}`}
                   value={newLeaderId ?? ""}
-                  onChange={(event) => setNewLeaderId(Number(event.target.value))}
+                  onChange={(event) =>
+                    setNewLeaderId(Number(event.target.value))
+                  }
                 >
                   <option value="">Kies een bevestigd lid</option>
                   {availableMembers.map((member) => (
@@ -285,6 +296,7 @@ function QuestOverview({
   onConfirm,
   onEdit,
   onCancelQuest,
+  onDelete,
   onTransfer,
 }: QuestOverviewProps) {
   const [questFilter, setQuestFilter] = useState<QuestOwnerFilter>("all");
@@ -311,7 +323,11 @@ function QuestOverview({
       </div>
 
       <div className="quest-filters">
-        <div className="quest-filter-group" role="group" aria-label="Wie plaatste de quest">
+        <div
+          className="quest-filter-group"
+          role="group"
+          aria-label="Wie plaatste de quest"
+        >
           <span className="quest-filter-label">Van</span>
           <Button
             size="small"
@@ -332,7 +348,11 @@ function QuestOverview({
             Mijn quests <span>{myQuests.length}</span>
           </Button>
         </div>
-        <div className="quest-filter-group" role="group" aria-label="Questsoort">
+        <div
+          className="quest-filter-group"
+          role="group"
+          aria-label="Questsoort"
+        >
           {(
             [
               ["all", "Alle"],
@@ -373,6 +393,7 @@ function QuestOverview({
               onConfirm={onConfirm}
               onEdit={onEdit}
               onCancelQuest={onCancelQuest}
+              onDelete={onDelete}
               onTransfer={onTransfer}
             />
           ))}

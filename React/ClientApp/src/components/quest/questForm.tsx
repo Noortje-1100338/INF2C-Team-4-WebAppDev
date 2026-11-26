@@ -12,7 +12,7 @@ interface QuestFormProps {
   member: QuestMember;
   initialQuest?: Quest;
   onCancel: () => void;
-  onSave: (details: QuestDetails) => string | null;
+  onSave: (details: QuestDetails) => string | null | Promise<string | null>;
 }
 
 function getDepartureDate(): string {
@@ -172,8 +172,12 @@ function QuestForm({ member, initialQuest, onCancel, onSave }: QuestFormProps) {
       )}
 
       <div className="modal-actions">
-        <Button type="submit">
-          {isEditing ? "Wijzigingen opslaan" : "Quest plaatsen"}
+        <Button type="submit" disabled={isSaving}>
+          {isSaving
+            ? "Opslaan..."
+            : isEditing
+              ? "Wijzigingen opslaan"
+              : "Quest plaatsen"}
         </Button>
         <Button type="button" variant="secondary" onClick={onCancel}>
           Annuleren

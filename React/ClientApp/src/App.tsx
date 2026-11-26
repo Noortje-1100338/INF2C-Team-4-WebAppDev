@@ -1,4 +1,4 @@
-import { NavLink, Route, Routes, useLocation } from "react-router";
+import { NavLink, Route, Routes } from "react-router";
 import ArmoryPage from "./pages/armoryPage";
 import QuestPage from "./pages/questPage";
 import ArchivePage from "./pages/archivePage";
@@ -30,7 +30,7 @@ function AppLayout() {
     }
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
-  }),[];
+  }, []);
   return (
     <div className="page">
       {isMobile && !collapsed && (

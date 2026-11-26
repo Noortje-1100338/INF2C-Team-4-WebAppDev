@@ -5,10 +5,13 @@ import QuestOverview from "../components/quest/questOverview";
 import useModal from "../hooks/useModal";
 import { useEffect, useState } from "react";
 import {
+  createQuest as createQuestRequest,
+  deleteQuest as deleteQuestRequest,
   fetchQuests,
   questCreatures,
   questMembers,
   saveQuests,
+  updateQuest as updateQuestRequest,
   type Quest,
   type QuestDetails,
 } from "../services/questRepository";
@@ -139,214 +142,237 @@ function QuestPage() {
     return null;
   }
 
-  function saveQuest(details: QuestDetails): string | null {
+  async function saveQuest(details: QuestDetails): Promise<string | null> {
     const validationError = validateQuest(details);
     if (validationError) {
       return validationError;
     }
 
-    if (editingQuest) {
-      const updatedQuest: Quest = { ...editingQuest, ...details };
-      const error = updateQuests(
-        quests.map((quest) =>
-          quest.id === editingQuest.id ? updatedQuest : quest,
-        ),
-      );
-      if (error) {
-        return error;
+    try {
+      if (editingQuest) {
+        const updatedQuest = await updateQuestRequest(editingQuest.id, {
+          leaderId: activeMember.id,
+          ...details,
+        });
+
+        setQuestState((current) => ({
+          ...current,
+          quests: current.quests.map((quest) =>
+            quest.id === updatedQuest.id ? updatedQuest : quest,
+          ),
+        }));
+        setNotice("De quest is gewijzigd.");
+      } else {
+        const newQuest = await createQuestRequest({
+          leaderId: activeMember.id,
+          ...details,
+        });
+        setQuestState((current) => ({
+          ...current,
+          quests: [...current.quests, newQuest],
+        }));
+        setNotice("De quest is toegevoegd.");
       }
-      setNotice("De quest is bijgewerkt.");
-    } else {
-      const newQuest: Quest = {
+      setEditingQuest(null);
+      closeModal();
+      return null;
+    } catch {
+      return "Opslaan is niet gelukt.";
+    }
+  }
+
+function openCreateModal(): void {
+  setEditingQuest(null);
+  openModal();
+}
+
+function closeQuestModal(): void {
+  setEditingQuest(null);
+  closeModal();
+}
+
+function editQuest(quest: Quest): void {
+  if (quest.leaderId !== activeMember.id || quest.cancelled) {
+    return;
+  }
+  setEditingQuest(quest);
+  openModal();
+}
+
+// Aanvraag plek quest
+function requestPlace(questId: number): void {
+  const quest = quests.find((item) => item.id === questId);
+  if (!quest) {
+    setNotice("Deze quest bestaat niet meer.");
+    return;
+  }
+  if (quest.cancelled || quest.departureDate <= getLocalToday()) {
+    setNotice("Je kunt geen plek meer aanvragen.");
+    return;
+  }
+  if (quest.leaderId === activeMember.id) {
+    setNotice("De leider kan geen plek aanvragen.");
+    return;
+  }
+  if (quest.requests.some((request) => request.memberId === activeMember.id)) {
+    setNotice("Je hebt al een aanvraag ingediend.");
+    return;
+  }
+
+  const updatedQuest: Quest = {
+    ...quest,
+    requests: [
+      ...quest.requests,
+      {
         id: 0,
-        leaderId: activeMember.id,
-        ...details,
-        cancelled: false,
-        requests: [],
-      };
-      const error = updateQuests([newQuest, ...quests]);
-      if (error) {
-        return error;
-      }
-      setNotice("De quest is geplaatst.");
-    }
+        memberId: activeMember.id,
+        confirmed: false,
+      },
+    ],
+  };
+  saveQuestChange(
+    quest.id,
+    updatedQuest,
+    "Je aanvraag wacht op bevestiging van de leider.",
+  );
+}
 
-    setEditingQuest(null);
-    closeModal();
-    return null;
+// Goedkeuren van een aanvraag, controleer rechten en plekken
+function confirmRequest(questId: number, requestId: number): void {
+  const quest = quests.find((item) => item.id === questId);
+  const request = quest?.requests.find((item) => item.id === requestId);
+  const requestedMember = questMembers.find(
+    (member) => member.id === request?.memberId,
+  );
+
+  if (!quest || !request || !requestedMember) {
+    setNotice("De aanvraag kon niet worden gevonden.");
+    return;
+  }
+  if (quest.leaderId !== activeMember.id) {
+    setNotice("Alleen de leider kan aanvragen bevestigen.");
+    return;
+  }
+  if (quest.cancelled || quest.departureDate <= getLocalToday()) {
+    setNotice("Aanvragen kunnen niet meer worden bevestigd.");
+    return;
+  }
+  if (request.confirmed) {
+    setNotice("Deze aanvraag is al bevestigd.");
+    return;
   }
 
-  function openCreateModal(): void {
-    setEditingQuest(null);
-    openModal();
+  const confirmedCount = quest.requests.filter((item) => item.confirmed).length;
+  const hasAvailablePlace = confirmedCount + 1 < quest.partySize;
+  if (!hasAvailablePlace) {
+    setNotice("De partij is vol.");
+    return;
   }
 
-  function closeQuestModal(): void {
-    setEditingQuest(null);
-    closeModal();
+  const creature = findCreature(quest.creatureId);
+  if (creature?.dangerous && !requestedMember.trained) {
+    setNotice("Bij een gevaarlijk wezen kunnen alleen getrainde leden mee.");
+    return;
   }
 
-  function editQuest(quest: Quest): void {
-    if (quest.leaderId !== activeMember.id || quest.cancelled) {
-      return;
-    }
-    setEditingQuest(quest);
-    openModal();
+  const updatedQuest: Quest = {
+    ...quest,
+    requests: quest.requests.map((item) =>
+      item.id === requestId ? { ...item, confirmed: true } : item,
+    ),
+  };
+  saveQuestChange(
+    quest.id,
+    updatedQuest,
+    `${requestedMember.name} is bevestigd voor de quest.`,
+  );
+}
+
+function cancelQuest(quest: Quest): void {
+  if (quest.leaderId !== activeMember.id || quest.cancelled) {
+    setNotice("Alleen de leider kan de quest annuleren.");
+    return;
+  }
+  if (
+    !window.confirm(
+      `Weet je zeker dat je de quest in ${quest.village} wilt annuleren?`,
+    )
+  ) {
+    return;
   }
 
-  // Aanvraag plek quest
-  function requestPlace(questId: number): void {
-    const quest = quests.find((item) => item.id === questId);
-    if (!quest) {
-      setNotice("Deze quest bestaat niet meer.");
-      return;
-    }
-    if (quest.cancelled || quest.departureDate <= getLocalToday()) {
-      setNotice("Je kunt geen plek meer aanvragen.");
-      return;
-    }
-    if (quest.leaderId === activeMember.id) {
-      setNotice("De leider kan geen plek aanvragen.");
-      return;
-    }
-    if (
-      quest.requests.some((request) => request.memberId === activeMember.id)
-    ) {
-      setNotice("Je hebt al een aanvraag ingediend.");
-      return;
-    }
+  const updatedQuest = { ...quest, cancelled: true };
+  saveQuestChange(quest.id, updatedQuest, "De quest is geannuleerd.");
+}
 
-    const updatedQuest: Quest = {
-      ...quest,
-      requests: [
-        ...quest.requests,
-        {
-          id: 0,
-          memberId: activeMember.id,
-          confirmed: false,
-        },
-      ],
-    };
-    saveQuestChange(
-      quest.id,
-      updatedQuest,
-      "Je aanvraag wacht op bevestiging van de leider.",
-    );
+async function removeQuest(quest: Quest): Promise<void> {
+  if (quest.leaderId !== activeMember.id || quest.cancelled) {
+    setNotice("Alleen de leider kan de quest verwijderen.");
+    return;
+  }
+  if (
+    !window.confirm(
+      `Weet je zeker dat je de quest in ${quest.village} wilt verwijderen?`,
+    )
+  ) {
+    return;
   }
 
-  // Goedkeuren van een aanvraag, controleer rechten en plekken
-  function confirmRequest(questId: number, requestId: number): void {
-    const quest = quests.find((item) => item.id === questId);
-    const request = quest?.requests.find((item) => item.id === requestId);
-    const requestedMember = questMembers.find(
-      (member) => member.id === request?.memberId,
-    );
+  try {
+    await deleteQuestRequest(quest.id);
+    setQuestState((current) => ({
+      ...current,
+      quests: current.quests.filter((item) => item.id !== quest.id),
+    }));
+    setNotice("De quest is verwijderd.");
+  } catch {
+    setNotice("De quest kon niet worden verwijderd.");
+  }
+}
 
-    if (!quest || !request || !requestedMember) {
-      setNotice("De aanvraag kon niet worden gevonden.");
-      return;
-    }
-    if (quest.leaderId !== activeMember.id) {
-      setNotice("Alleen de leider kan aanvragen bevestigen.");
-      return;
-    }
-    if (quest.cancelled || quest.departureDate <= getLocalToday()) {
-      setNotice("Aanvragen kunnen niet meer worden bevestigd.");
-      return;
-    }
-    if (request.confirmed) {
-      setNotice("Deze aanvraag is al bevestigd.");
-      return;
-    }
-
-    const confirmedCount = quest.requests.filter(
-      (item) => item.confirmed,
-    ).length;
-    const hasAvailablePlace = confirmedCount + 1 < quest.partySize;
-    if (!hasAvailablePlace) {
-      setNotice("De partij is vol.");
-      return;
-    }
-
-    const creature = findCreature(quest.creatureId);
-    if (creature?.dangerous && !requestedMember.trained) {
-      setNotice("Bij een gevaarlijk wezen kunnen alleen getrainde leden mee.");
-      return;
-    }
-
-    const updatedQuest: Quest = {
-      ...quest,
-      requests: quest.requests.map((item) =>
-        item.id === requestId ? { ...item, confirmed: true } : item,
-      ),
-    };
-    saveQuestChange(
-      quest.id,
-      updatedQuest,
-      `${requestedMember.name} is bevestigd voor de quest.`,
-    );
+// Leiderschap overdragen
+function transferLeadership(questId: number, newLeaderId: number): void {
+  const quest = quests.find((item) => item.id === questId);
+  if (!quest || quest.leaderId !== activeMember.id || quest.cancelled) {
+    setNotice("Alleen de leider kan het leiderschap overdragen.");
+    return;
   }
 
-  function cancelQuest(quest: Quest): void {
-    if (quest.leaderId !== activeMember.id || quest.cancelled) {
-      setNotice("Alleen de leider kan de quest annuleren.");
-      return;
-    }
-    if (
-      !window.confirm(
-        `Weet je zeker dat je de quest in ${quest.village} wilt annuleren?`,
-      )
-    ) {
-      return;
-    }
-
-    const updatedQuest = { ...quest, cancelled: true };
-    saveQuestChange(quest.id, updatedQuest, "De quest is geannuleerd.");
+  const confirmedRequest = quest.requests.find(
+    (request) => request.memberId === newLeaderId && request.confirmed,
+  );
+  if (!confirmedRequest) {
+    setNotice("Kies een lid met een bevestigde plek.");
+    return;
   }
 
-  // Leiderschap overdragen
-  function transferLeadership(questId: number, newLeaderId: number): void {
-    const quest = quests.find((item) => item.id === questId);
-    if (!quest || quest.leaderId !== activeMember.id || quest.cancelled) {
-      setNotice("Alleen de leider kan het leiderschap overdragen.");
-      return;
-    }
-
-    const confirmedRequest = quest.requests.find(
-      (request) => request.memberId === newLeaderId && request.confirmed,
-    );
-    if (!confirmedRequest) {
-      setNotice("Kies een lid met een bevestigde plek.");
-      return;
-    }
-
-    const newLeader = questMembers.find((member) => member.id === newLeaderId);
-    if (!newLeader) {
-      setNotice("Dit lid kon niet worden gevonden.");
-      return;
-    }
-
-    const creature = findCreature(quest.creatureId);
-    if (creature?.dangerous && !newLeader.trained) {
-      setNotice("Alleen een getraind lid kan deze quest leiden.");
-      return;
-    }
-
-    const updatedQuest: Quest = {
-      ...quest,
-      leaderId: newLeaderId,
-      requests: quest.requests.map((request) =>
-        request.id === confirmedRequest.id
-          ? { ...request, memberId: activeMember.id }
-          : request,
-      ),
-    };
-    saveQuestChange(
-      quest.id,
-      updatedQuest,
-      `Het leiderschap is overgedragen aan ${newLeader.name}.`,
-    );
+  const newLeader = questMembers.find((member) => member.id === newLeaderId);
+  if (!newLeader) {
+    setNotice("Dit lid kon niet worden gevonden.");
+    return;
   }
+
+  const creature = findCreature(quest.creatureId);
+  if (creature?.dangerous && !newLeader.trained) {
+    setNotice("Alleen een getraind lid kan deze quest leiden.");
+    return;
+  }
+
+  const updatedQuest: Quest = {
+    ...quest,
+    leaderId: newLeaderId,
+    requests: quest.requests.map((request) =>
+      request.id === confirmedRequest.id
+        ? { ...request, memberId: activeMember.id }
+        : request,
+    ),
+  };
+  saveQuestChange(
+    quest.id,
+    updatedQuest,
+    `Het leiderschap is overgedragen aan ${newLeader.name}.`,
+  );
+}
 
   return (
     <main className="quest-page">
@@ -392,6 +418,7 @@ function QuestPage() {
         onConfirm={confirmRequest}
         onEdit={editQuest}
         onCancelQuest={cancelQuest}
+        onDelete={removeQuest}
         onTransfer={transferLeadership}
       />
 

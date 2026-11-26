@@ -180,3 +180,41 @@ export function getQuests(): Quest[] {
 export function saveQuests(quests: Quest[]): void {
   localStorage.setItem(storageKey, JSON.stringify(quests));
 }
+
+export async function createQuest(
+  quest: QuestDetails & { leaderId: number },
+): Promise<Quest> {
+  const response = await fetch("/api/quest", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(quest),
+  });
+  if (!response.ok) {
+    throw new Error("Failed to create quest");
+  }
+  return response.json() as Promise<Quest>;
+}
+
+export async function updateQuest(
+  id: number,
+  quest: QuestDetails & { leaderId: number },
+): Promise<Quest> {
+  const response = await fetch(`/api/quest/${id}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(quest),
+  });
+  if (!response.ok) {
+    throw new Error("Failed to update quest");
+  }
+  return response.json() as Promise<Quest>;
+}
+
+export async function deleteQuest(id: number): Promise<void> {
+  const response = await fetch(`/api/quest/${id}`, {
+    method: "DELETE",
+  });
+  if (!response.ok) {
+    throw new Error("Failed to delete quest");
+  }
+}
