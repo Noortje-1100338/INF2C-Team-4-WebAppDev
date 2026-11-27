@@ -33,7 +33,6 @@ function GearDetailHeader({
                         <h1>{gear.name}</h1>
                     </div>
                     
-                    {/* De badge gevaarlijk is hardcoded, maar kan in de toekomst worden aangepast op basis van de gear.dangerous property */}
                     <div className="gear-detail-status">
                         {gear.dangerous ? (
                             <Badge variant="danger">Gevaarlijk</Badge>
