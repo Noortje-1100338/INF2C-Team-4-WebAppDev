@@ -9,12 +9,14 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
     size?: ButtonSize;
     fullWidth?: boolean;
     children: React.ReactNode;
+    loading?: boolean;
 }
 
 const Button: React.FC<ButtonProps> = ({
     variant = 'primary',
     size = 'medium',
     fullWidth = false,
+    loading = false,
     children,
     type = 'button',
     className = "",
@@ -32,7 +34,8 @@ const Button: React.FC<ButtonProps> = ({
     .join(' ');
 
     return (
-        <button className={classes} type={type} disabled={disabled}  {...rest}>
+        <button className={classes} type={type} disabled={disabled || loading} aria-busy={loading}  {...rest}>
+            {loading && <span className="btn-spinner" aria-hidden="true" />}
             {children}
         </button>
     );

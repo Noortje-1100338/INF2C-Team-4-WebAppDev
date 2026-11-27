@@ -11,7 +11,7 @@ interface GearFormProps {
 
 function GearForm({ onCancel, onSaved }: GearFormProps) {
     const [ imageUrl, setImageUrl ] = useState<string | undefined>(undefined);
-
+    const [isLoading, setIsLoading] = useState(false);
     const {showToast } = useToast();
 
     function handleImageChange(event: React.ChangeEvent<HTMLInputElement>) {
@@ -28,6 +28,7 @@ function GearForm({ onCancel, onSaved }: GearFormProps) {
         const form = event.currentTarget;
         const formData = new FormData(form);
         try {
+            setIsLoading(true);
             const saved = await saveGearItem({
                 name: String(formData.get("name")).trim(),
                 kind: String(formData.get("kind")),
@@ -42,6 +43,8 @@ function GearForm({ onCancel, onSaved }: GearFormProps) {
             setImageUrl(undefined);
         } catch {
             showToast({ type: "error", title: "Er is iets misgegaan", message: "Het opslaan van de uitrusting is mislukt. Probeer het opnieuw."});
+        } finally {
+            setIsLoading(false);
         }
 
     }
@@ -99,7 +102,7 @@ function GearForm({ onCancel, onSaved }: GearFormProps) {
                 </p>
             </fieldset>
             <div className="modal-actions">
-                <Button type="submit">Opslaan</Button>
+                <Button type="submit" loading={isLoading}>Opslaan</Button>
                 <Button type ="button" variant="secondary" onClick={onCancel}>Annuleren</Button>
             </div>
         </form>

@@ -2,9 +2,12 @@ import type { GearItem } from "../../../services/gearRepository";
 import "./gearDetailInfo.css";
 import Button from "../../ui/button/button";
 import { ArrowRight, ShieldCheck } from "lucide-react";
+import { useAuthContext } from "../../../context/authContext";
 
 interface GearDetailInfoProps {
     gear: GearItem;
+    onLoanClick: () => void;
+    onReturnClick: () => void;
 }
 
 
@@ -15,7 +18,11 @@ const conditionLabels: Record<string, string> = {
     damaged: "Beschadigd",
 }
 
-function GearDetailInfo({ gear }: GearDetailInfoProps) {
+function GearDetailInfo({ gear, onLoanClick, onReturnClick }: GearDetailInfoProps) {
+    const { user } = useAuthContext();
+    const isOnLoan = gear.loanedTo != null;
+    const mayReturn = isOnLoan && (gear.loanedToMemberId === user?.id || user?.quartermaster === true);
+    
     return (
         <section className="gear-detail-info" aria-labelledby="gear-detail-info-title">
             <h2 id="gear-detail-info-title">Gegevens</h2>
@@ -65,10 +72,17 @@ function GearDetailInfo({ gear }: GearDetailInfoProps) {
             </div>
             
             <div className="gear-detail-loan">
-                <Button type="button" variant="primary" fullWidth className="gear-detail-loan-button">
-                    <span>Uitrusting Lenen</span>
-                    <ArrowRight className="gear-detail-loan-icon" size={18} strokeWidth={1.8} aria-hidden="true" />
-                </Button>
+                {mayReturn ? (
+                    <Button type="button" variant="secondary" fullWidth className="gear-detail-loan-button" onClick={onReturnClick}>
+                        <span>Uitrusting Inleveren</span>
+                        <ArrowRight className="gear-detail-loan-icon" size={18} strokeWidth={1.8} aria-hidden="true" />
+                    </Button>
+                ) : (
+                    <Button type="button" variant="primary" fullWidth className="gear-detail-loan-button" onClick={onLoanClick} disabled={gear.retired || gear.loanedTo !== null}>
+                        <span>Uitrusting Lenen</span>
+                        <ArrowRight className="gear-detail-loan-icon" size={18} strokeWidth={1.8} aria-hidden="true" />
+                    </Button>
+                )}
             </div>
 
 

@@ -1,6 +1,7 @@
 using Hollowmere.Api.Data;
 using Microsoft.EntityFrameworkCore;
 using Hollowmere.Api.Services;
+using Hollowmere.Api.Repositories;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
@@ -48,7 +49,20 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     )
 );
 
+
 builder.Services.AddScoped<IGearItemService, GearItemService>();
+
+builder.Services.AddScoped<ILoanRepository, LoanRepository>();
+
+builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
+
+builder.Services.AddScoped<IReportRepository, ReportRepository>();
+
+builder.Services.AddScoped<IGearItemRepository, GearItemRepository>();  
+
+builder.Services.AddScoped<IReportService, ReportService>();
+
+builder.Services.AddScoped<ILookupService, LookupService>();
 
 builder.Services.AddCors(options =>
 {
@@ -63,6 +77,8 @@ builder.Services.AddCors(options =>
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+builder.Services.AddScoped<ILoanService, LoanService>();
 
 var app = builder.Build();
 

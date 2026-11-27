@@ -1,11 +1,14 @@
 using Hollowmere.Api.Services;
 using Hollowmere.Api.DTOs;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
 
 namespace Hollowmere.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[Authorize]
 public class GearItemController : ControllerBase
 {
     private readonly IGearItemService _service;
@@ -32,7 +35,17 @@ public class GearItemController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> Create(CreateGearItemRequest request)
     {
-        var created = await _service.CreateAsync(request);
-        return CreatedAtAction(nameof(GetAll), created);
+        try {
+            var created = await _service.CreateAsync(request, GetMemberId());
+            return CreatedAtAction(nameof(GetAll), created);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+    }
+    private int GetMemberId()
+    {
+        return int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
     }
 }

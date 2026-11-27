@@ -1,18 +1,18 @@
 import { createContext, useContext, useState, useEffect } from "react";
-import { useAuth } from "../hooks/useAuth";
+import { useAuth, type AuthUser } from "../hooks/useAuth";
 
-type AuthUser ={ name: string } | null;
+type AuthUserState = AuthUser | null;
 
 type AuthContextType = {
-    user: AuthUser;
-    setUser: (user: AuthUser) => void;
+    user: AuthUserState;
+    setUser: (user: AuthUserState) => void;
     isLoading: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
 
 export function AuthProvider({ children }: { children: React.ReactNode}) {
-    const [user, setUser] = useState<AuthUser>(null);
+    const [user, setUser] = useState<AuthUserState>(null);
     const [isLoading, setIsLoading] = useState(true);
     const { me } = useAuth();
 

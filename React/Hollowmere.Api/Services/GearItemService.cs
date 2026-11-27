@@ -1,41 +1,47 @@
 using Hollowmere.Api.Models;
 using Hollowmere.Api.DTOs;
-using Hollowmere.Api.Data;
-using Microsoft.EntityFrameworkCore;
+using Hollowmere.Api.Repositories;
 using System.Text.RegularExpressions;
 
 namespace Hollowmere.Api.Services;
 
 public class GearItemService : IGearItemService
 {
-    private readonly AppDbContext _db;
+    private readonly IGearItemRepository _gear;
+    private readonly IRepository<Member> _members;
     private readonly IWebHostEnvironment _env;
+    private readonly ILoanRepository _loans;
 
-    public GearItemService(AppDbContext db, IWebHostEnvironment env)
+    public GearItemService(IGearItemRepository gear, IRepository<Member> members, IWebHostEnvironment env, ILoanRepository loans)
     {
-        _db = db;
+        _gear = gear;
+        _members = members;
         _env = env;
+        _loans = loans;
     }
-
-    public GearItemService(AppDbContext db)
-    {
-        _db = db;
-    }
-
     public async Task<IEnumerable<GearItemResponse>> GetAllAsync()
     {
-        var items = await _db.GearItems.OrderByDescending(g => g.Id).ToListAsync();
-        return items.Select(ToResponse);
+        var items = await _gear.GetAllAsync();
+
+        var activeLoans = (await _loans.GetActiveAsync()).ToDictionary(l => l.GearId);
+        return items.Select(item => ToResponse(item, activeLoans.GetValueOrDefault(item.Id)));
     }
 
     public async Task<GearItemResponse?> GetByIdAsync(int id)
     {
-        var item = await _db.GearItems.FirstOrDefaultAsync(g => g.Id == id);
-        return item == null ? null : ToResponse(item);
+        var item = await _gear.GetByIdAsync(id);
+        if (item == null) return null;
+
+        var loan = await _loans.GetActiveForGearAsync(id);
+        return ToResponse(item, loan);
     }
 
-    public async Task<GearItemResponse> CreateAsync(CreateGearItemRequest request)
+    public async Task<GearItemResponse> CreateAsync(CreateGearItemRequest request, int memberId)
     {
+        var member = await _members.GetIdByAsync(memberId);
+        if (member is null or { Quartermaster: false })
+            throw new InvalidOperationException("Alleen kwartiermeesters kunnen uitrusting toevoegen.");
+
         var imageUrl = string.IsNullOrEmpty(request.ImageUrl)
             ? string.Empty
             : await SaveImageAsync(request.ImageUrl);
@@ -50,12 +56,12 @@ public class GearItemService : IGearItemService
             ImageUrl = imageUrl
         };
 
-        _db.GearItems.Add(item);
-        await _db.SaveChangesAsync();
+        _gear.Add(item);
+        await _gear.SaveChangesAsync();
 
         return ToResponse(item);
     }
-    private static GearItemResponse ToResponse(GearItem item) => new()
+    private static GearItemResponse ToResponse(GearItem item, Loan? loan = null) => new()
         {
             Id = item.Id,
             Name = item.Name,
@@ -65,7 +71,9 @@ public class GearItemService : IGearItemService
             Dangerous = item.Dangerous,
             Retired = item.Retired,
             ImageUrl = string.IsNullOrEmpty(item.ImageUrl) ? null : item.ImageUrl,
-            LoanedTo = null
+            LoanedTo = loan?.Member.Name,
+            LoanedToMemberId = loan?.MemberId,
+            ActiveLoanId = loan?.Id
         };
 
         private async Task<string> SaveImageAsync(string dataUrl)

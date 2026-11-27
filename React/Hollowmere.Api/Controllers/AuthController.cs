@@ -2,6 +2,7 @@ using Hollowmere.Api.Services;
 using Hollowmere.Api.DTOs;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
 namespace Hollowmere.Api.Controllers;
 
 [ApiController]
@@ -22,7 +23,7 @@ public class AuthController : ControllerBase
         {
             var result = await _authService.Register(request);
             SetAuthCookie(result.Token);
-            return Ok(new AuthResponse { Name = result.Name });
+            return Ok(new AuthResponse { Id = result.Id, Name = result.Name, Trained = result.Trained, Quartermaster = result.Quartermaster });
         }
         catch (InvalidOperationException ex)
         {
@@ -37,7 +38,7 @@ public class AuthController : ControllerBase
         {
             var result = await _authService.Login(request);
             SetAuthCookie(result.Token);
-            return Ok(new AuthResponse { Name = result.Name });
+            return Ok(new AuthResponse {Id = result.Id, Name = result.Name, Trained = result.Trained, Quartermaster = result.Quartermaster });
         }
         catch (UnauthorizedAccessException ex)
         {
@@ -47,9 +48,11 @@ public class AuthController : ControllerBase
 
     [HttpGet("me")]
     [Authorize]
-    public IActionResult Me()
+    public async Task<IActionResult> Me()
     {
-        return Ok(new AuthResponse { Name = User.FindFirst("Name")!.Value});
+        var user = await _authService.GetByIdAsync(GetMemberId());
+        if (user == null) return Unauthorized();
+        return Ok(user);
     }
 
     [HttpPost("logout")]
@@ -68,5 +71,10 @@ public class AuthController : ControllerBase
             SameSite = SameSiteMode.Lax,
             Expires = DateTimeOffset.UtcNow.AddDays(7)
         });
+    }
+
+    private int GetMemberId()
+    {
+        return int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
     }
 }

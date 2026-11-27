@@ -74,7 +74,7 @@ function LoginForm() {
                     </button>
                 </div>
             </div>
-            <Button type="submit" disabled={isLoading}>{ isLoading ? "Bezig...": "Inloggen" }</Button>
+            <Button type="submit" loading={isLoading}>Inloggen</Button>
         </form>
     );
 }
