@@ -20,14 +20,14 @@ public class GearItemController : ControllerBase
     [HttpGet]
     public async Task<ActionResult> GetAll()
     {
-        var items = await _service.GetAllAsync();
+        var items = await _service.GetAllAsync(GetMemberId());
         return Ok(items);
     }
 
     [HttpGet("{id}")]
     public async Task<ActionResult> GetById(int id)
     {
-        var item = await _service.GetByIdAsync(id);
+        var item = await _service.GetByIdAsync(id, GetMemberId());
         if (item == null)
             return NotFound();
         return Ok(item);

@@ -10,8 +10,11 @@ interface GearCardProps {
 }
 
 function GearCard({ gear }: GearCardProps) {
+    const isOnLoan = gear.loanedTo !== null;
+    const isAvailable = !gear.retired && !isOnLoan;
+
     return (
-        <Card className="gear-card">
+        <Card className={`gear-card${isAvailable? "" : " gear-card--unavailable"}`}>
             <div className="gear-card-top">
                 <span className="gear-card-label">
                     {gear.kind}
@@ -51,7 +54,7 @@ function GearCard({ gear }: GearCardProps) {
                 </div>
                 <div className="gear-card-fact gear-card-fact-end">
                     <dt>Status</dt>
-                    <dd>{gear.retired ? "Buiten dienst" : "Beschikbaar"}</dd>
+                    <dd>{gear.retired ? "Buiten dienst" : isOnLoan ? "Uitgeleend" : "Beschikbaar"}</dd>
                 </div>
             </dl>
             <Link className="gear-card-action" to={`/armory/${gear.id}`}>

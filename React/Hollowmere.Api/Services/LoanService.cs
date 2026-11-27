@@ -1,7 +1,8 @@
 using Hollowmere.Api.DTOs;
 using Hollowmere.Api.Models;
 using Hollowmere.Api.Repositories;
-
+using Hollowmere.Api.Configuration;
+using Microsoft.Extensions.Options;
 namespace Hollowmere.Api.Services;
 
 
@@ -10,12 +11,13 @@ public class LoanService : ILoanService
     private readonly ILoanRepository _loans;
     private readonly IRepository<GearItem> _gear;
     private readonly IRepository<Member> _members;
-
-    public LoanService(ILoanRepository loans, IRepository<GearItem> gear, IRepository<Member> members)
+    private readonly LoanPolicyOptions _policy;
+    public LoanService(ILoanRepository loans, IRepository<GearItem> gear, IRepository<Member> members, IOptions<LoanPolicyOptions> policy)
     {
         _loans = loans;
         _gear = gear;
         _members = members;
+        _policy = policy.Value;
     }
 
     public async Task<IEnumerable<LoanResponse>> GetAllAsync()
@@ -24,6 +26,7 @@ public class LoanService : ILoanService
         return loans.Select(ToResponse);
     }
 
+    public LoanPolicyResponse GetPolicy() => new() { MaxLoanDays = _policy.MaxLoanDays };
     public async Task<LoanResponse> CreateAsync(CreateLoanRequest request, int memberId)
     {
         var gear = await _gear.GetIdByAsync(request.GearId);
@@ -44,15 +47,20 @@ public class LoanService : ILoanService
             ? "Uitrusting is al in uw bezit."
             : "Uitrusting is al uitgeleend aan een ander lid.");
         
-        if (request.DueDate <= DateTime.UtcNow)
-            throw new InvalidOperationException("Inleverdatum moet in de toekomst liggen.");
+        var now = DateTime.UtcNow;
+        if (await _loans.HasOverdueLoanAsync(memberId, now))
+            throw new InvalidOperationException("Je hebt een uitrusting openstaat die te laat is. Lever die eerst in voordat je een nieuwe uitrusting leent.");
+        
+        var lateReturns = await _loans.CountLateReturnsSinceAsync(memberId, now.AddYears(-1));
+        if (lateReturns >= _policy.LateReturnLimit)
+            throw new InvalidOperationException($"Je hebt het afgelopen jaar {lateReturns} keer te laat ingeleverd en kunt daarom niets lenen voorlopig");
         
         var loan = new Loan
         {
             GearId = request.GearId,
             MemberId = memberId,
-            StartDate = DateTime.UtcNow,
-            DueDate = request.DueDate
+            StartDate = now,
+            DueDate = now.AddDays(_policy.MaxLoanDays)
         };
         _loans.Add(loan);
         await _loans.SaveChangesAsync();

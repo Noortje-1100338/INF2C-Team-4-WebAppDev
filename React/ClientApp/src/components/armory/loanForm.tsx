@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Button from "../ui/button/button";
-import { createLoan, type Loan } from "../../services/loanRepository";
-import useToats from "../../hooks/useToast";
+import { createLoan, getLoanPolicy, type Loan } from "../../services/loanRepository";
+import useToast from "../../hooks/useToast";
 import "./gearForm.css"
 
 interface LoanFormProps {
@@ -12,19 +12,25 @@ interface LoanFormProps {
 
 function LoanForm({ gearId, onCancel, onLoaned }: LoanFormProps) {
     const [isLoading, setIsLoading] = useState(false);
-    const { showToast } = useToats();
+    const { showToast } = useToast();
+    const [dueDate, setDueDate] = useState<string | null>(null);
 
-    const tomorrow = new Date(Date.now() + 864000000).toISOString().slice(0, 10);
+    useEffect(() => {
+        getLoanPolicy()
+            .then(policy => {
+                const date = new Date();
+                date.setDate(date.getDate() + policy.maxLoanDays);
+                setDueDate(date.toLocaleDateString("nl-NL", { day: "numeric", month: "long" }));
+            })
+            .catch(() => setDueDate(null));
+    }, []);
     
     async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
         event.preventDefault();
-        const formData = new FormData(event.currentTarget);
-
         try {
             setIsLoading(true);
             const loan = await createLoan({
                 gearId,
-                dueDate: new Date(String(formData.get("dueDate"))).toISOString()
             });
             showToast({ type: "success", title: "Uitrusting geleend"});
             onLoaned(loan);
@@ -37,10 +43,10 @@ function LoanForm({ gearId, onCancel, onLoaned }: LoanFormProps) {
 
     return (
         <form className="gear-form" onSubmit={handleSubmit}>
-            <div className="form-group">
-                <label htmlFor="dueDate">Inleverdatum</label>
-                <input type="date" id="dueDate" name="dueDate" min={tomorrow} defaultValue={tomorrow} required />
-            </div>
+            <p className="form-help">
+                {dueDate ? `Je leent deze uitrusting tot ${dueDate}. Lever het op tijd in`
+                : "Je leent deze uitrusting volgens de standaard leentermijn van het gilde"}
+            </p>
 
             <div className="modal-actions">
                 <Button type="submit" loading={isLoading}>Lenen</Button>

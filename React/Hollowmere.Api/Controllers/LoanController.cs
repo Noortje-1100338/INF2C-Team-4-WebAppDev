@@ -54,6 +54,12 @@ public class LoanController : ControllerBase
         }
     }
 
+    [HttpGet("policy")]
+    public IActionResult Policy()
+    {
+        return Ok(_service.GetPolicy());
+    }
+
     private int GetMemberId()
     {
         return int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);

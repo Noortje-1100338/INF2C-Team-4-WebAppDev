@@ -164,5 +164,89 @@ public static class DbSeeder
     );
 
     await db.SaveChangesAsync();
+
+    var gearItems = new[]
+    {
+        new GearItem { 
+            Id = 1, Name = "Hennep touw", 
+            Kind = "Rope",
+            Condition = "Good",
+            Description = "Een stevig touw van hennep.",
+            Dangerous = false,
+            Retired = false,
+            ImageUrl = ""
+        },
+        new GearItem { 
+            Id = 2, Name = "IJzeren zwaard", 
+            Kind = "Sword",
+            Condition = "Good",
+            Description = "Een scherp zwaard van ijzer.",
+            Dangerous = true,
+            Retired = false,
+            ImageUrl = ""
+        },
+        new GearItem { 
+            Id = 3, Name = "Houten schild", 
+            Kind = "Shield",
+            Condition = "worn",
+            Description = "Een stevig schild van hout.",
+            Dangerous = true,
+            Retired = false,
+            ImageUrl = ""
+        },
+        new GearItem { 
+            Id = 4, Name = "IJzeren helm", 
+            Kind = "Helmet",
+            Condition = "Good",
+            Description = "Een beschermende helm van ijzer.",
+            Dangerous = true,
+            Retired = false,
+            ImageUrl = ""
+        },
+        new GearItem { 
+            Id = 5, Name = "IJzeren harnas", 
+            Kind = "Armor",
+            Condition = "Good",
+            Description = "Een beschermend harnas van ijzer.",
+            Dangerous = false,
+            Retired = true,
+            ImageUrl = ""
+        }
+    };
+    var existingGearIds = await db.GearItems
+        .Select(gear => gear.Id)
+        .ToListAsync();
+    db.GearItems.AddRange(
+        gearItems.Where(gear => !existingGearIds.Contains(gear.Id))
+    );
+    await db.SaveChangesAsync();
+
+    if (!await db.Members.AnyAsync(m => m.Email == "telaat@hollowmere.test"))
+        {
+            db.Members.Add(new Member
+            {
+                Name = "Vergeetachtige",
+                Email = "telaat@hollowmere.test",
+                PasswordHash = BCrypt.Net.BCrypt.HashPassword("telaat"),
+                Trained = true
+            });
+            await db.SaveChangesAsync();
+        }
+
+        var lateMember = await db.Members.FirstAsync(m => m.Email == "telaat@hollowmere.test");
+
+        if (!await db.Loans.AnyAsync(l => l.MemberId == lateMember.Id))
+        {
+            db.Loans.Add(new Loan
+            {
+                GearId = 2,
+                MemberId = lateMember.Id,
+                StartDate = DateTime.UtcNow.AddDays(-30),
+                DueDate = DateTime.UtcNow.AddDays(-16),
+            });
+            await db.SaveChangesAsync();
+        }
   }
+
+
 }

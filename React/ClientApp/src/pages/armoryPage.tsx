@@ -7,10 +7,13 @@ import GearGrid from "../components/armory/gearGrid";
 import { Grid2x2, List } from "lucide-react";
 import { useState, useEffect } from "react";
 import { getGearItems, type GearItem } from "../services/gearRepository";
+import { useAuthContext } from "../context/authContext";
+
 const viewModeStorageKey = "armory-view-mode";
 
 function ArmoryPage() {
   const [items, setItems] = useState<GearItem[]>([]);
+  const { user } = useAuthContext();
 
   useEffect(() => {
     getGearItems().then(setItems);
@@ -58,9 +61,11 @@ function ArmoryPage() {
           <div className="armory-title-row">
             <h1>Uitrusting</h1>
             <div className="armory-actions">
-              <Button onClick={openModal}>
-                Uitrusting toevoegen
-              </Button>
+              {user?.quartermaster && (
+                <Button onClick={openModal}>
+                  Uitrusting toevoegen
+                </Button>
+              )}
               <div className="gear-view-buttons">
                 <button className={`gear-view-button ${viewMode === "grid" ? "gear-view-button-active" : ""}`} type="button" aria-label="Grid View" aria-pressed={viewMode === "grid"} onClick={() => setViewMode("grid")}>
                   <Grid2x2 size={20} strokeWidth={1.8} />

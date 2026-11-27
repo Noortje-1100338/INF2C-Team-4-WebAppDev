@@ -52,7 +52,7 @@ function AppLayout() {
     }
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
-  }),[];
+  } ,[]);
   return (
     <div className="page">
       {isMobile && !collapsed && (

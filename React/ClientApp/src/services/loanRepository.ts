@@ -12,7 +12,10 @@ export interface Loan {
 
 export interface CreateLoanRequest {
     gearId: number;
-    dueDate: string;
+}
+
+export interface LoanPolicy {
+    maxLoanDays: number;
 }
 
 const API_BASE = '/api/loan';
@@ -48,5 +51,11 @@ export async function returnLoan(id: number, conditionNote: string): Promise<Loa
         const error = await res.json().catch(() => null);
         throw new Error(error?.message ?? 'Inleveren mislukt');
     }
+    return res.json();
+}
+
+export async function getLoanPolicy(): Promise<LoanPolicy> {
+    const res = await fetch(`${API_BASE}/policy`, { credentials: 'include' });
+    if (!res.ok) throw new Error(`Kon de lening policy niet ophalen: ${res.statusText}`);
     return res.json();
 }
