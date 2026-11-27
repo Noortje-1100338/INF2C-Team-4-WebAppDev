@@ -19,18 +19,29 @@ public class GearItemService : IGearItemService
         _env = env;
         _loans = loans;
     }
-    public async Task<IEnumerable<GearItemResponse>> GetAllAsync()
+
+    private async Task<bool> IsQuartermasterAsync(int memberId)
+    {
+        var member = await _members.GetIdByAsync(memberId);
+        return member?.Quartermaster ?? false;
+    }
+    public async Task<IEnumerable<GearItemResponse>> GetAllAsync(int memberId)
     {
         var items = await _gear.GetAllAsync();
+
+        if (!await IsQuartermasterAsync(memberId))
+            items = items.Where(i => !i.Retired).ToList();
 
         var activeLoans = (await _loans.GetActiveAsync()).ToDictionary(l => l.GearId);
         return items.Select(item => ToResponse(item, activeLoans.GetValueOrDefault(item.Id)));
     }
 
-    public async Task<GearItemResponse?> GetByIdAsync(int id)
+    public async Task<GearItemResponse?> GetByIdAsync(int id, int memberId)
     {
         var item = await _gear.GetByIdAsync(id);
         if (item == null) return null;
+
+        if (item.Retired && !await IsQuartermasterAsync(memberId)) return null;
 
         var loan = await _loans.GetActiveForGearAsync(id);
         return ToResponse(item, loan);

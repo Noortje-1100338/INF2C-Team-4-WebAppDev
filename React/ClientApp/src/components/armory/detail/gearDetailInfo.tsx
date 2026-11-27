@@ -41,7 +41,7 @@ function GearDetailInfo({ gear, onLoanClick, onReturnClick }: GearDetailInfoProp
 
                 <div className="gear-detail-fact">
                     <dt>Status</dt>
-                    <dd>{gear.retired ? "Buiten dienst" : "Beschikbaar"}</dd>
+                    <dd>{gear.retired ? "Buiten dienst" : isOnLoan ? "Uitgeleend" : "Beschikbaar"}</dd>
                 </div>
 
                 <div className="gear-detail-fact">
