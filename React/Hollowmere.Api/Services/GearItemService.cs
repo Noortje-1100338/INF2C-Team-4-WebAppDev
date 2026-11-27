@@ -72,6 +72,27 @@ public class GearItemService : IGearItemService
 
         return ToResponse(item);
     }
+
+    public async Task<GearItemResponse> RetireAsync(int id, int memberId)
+    {
+        if (!await IsQuartermasterAsync(memberId))
+            throw new InvalidOperationException("Alleen quartermasters kunnen uitrusting buiten dienst stellen.");
+
+        var item = await _gear.GetByIdAsync(id);
+        if (item is null)
+            throw new InvalidOperationException("Uitrusting niet gevonden");
+        if (item.Retired)
+            throw new InvalidOperationException("Deze uitrusting is al buiten dienst");
+
+        var loan = await _loans.GetActiveForGearAsync(id);
+        if (loan != null)
+            throw new InvalidOperationException($"Deze uitrusting is nog uitgeleend aan {loan.Member.Name}. Laat die het eerst inleveren");
+
+        item.Retired = true;
+        await _gear.SaveChangesAsync();
+
+        return ToResponse(item);
+    }
     private static GearItemResponse ToResponse(GearItem item, Loan? loan = null) => new()
         {
             Id = item.Id,

@@ -52,3 +52,15 @@ export async function saveGearItem(request: CreateGearItemRequest): Promise<Gear
     } 
     return res.json();
 }
+
+export async function retireGearItem(id: number): Promise<GearItem> {
+    const res = await fetch(`${API_BASE}/${id}/retire`, {
+        method: 'POST',
+        credentials: 'include'
+    });
+    if (!res.ok) {
+        const error = await res.json().catch(() => null);
+        throw new Error(error?.message ?? 'Buiten dienst stellen voor gear item mislukt');
+    }
+    return res.json();
+}

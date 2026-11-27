@@ -10,12 +10,14 @@ import GearDetailImage from "../../components/armory/detail/gearDetailImage";
 import GearDetailInfo from "../../components/armory/detail/gearDetailInfo";
 import GearDetailTabs from "../../components/armory/detail/gearDetailTabs";
 import { getGearItem, type GearItem } from "../../services/gearRepository";
+import RetireForm from "../../components/armory/retireForm";
 import "./gearDetailPage.css";
 
 function GearDetailPage() {
     const { id } = useParams();
     const loanModal = useModal();
     const returnModal = useModal();
+    const retireModal = useModal();
     const [gear, setGear] = useState<GearItem | null>(null);
     const [isLoading, setIsLoading] = useState(true);
 
@@ -31,6 +33,11 @@ function GearDetailPage() {
 
     function handleReturned() {
         returnModal.closeModal();
+        refreshGear();
+    }
+
+    function handleRetired() {
+        retireModal.closeModal();
         refreshGear();
     }
 
@@ -53,7 +60,7 @@ function GearDetailPage() {
             
             <div className="gear-detail-content">
                 <GearDetailImage gear={gear} />
-                <GearDetailInfo gear={gear} onLoanClick={loanModal.openModal} onReturnClick={returnModal.openModal} />
+                <GearDetailInfo gear={gear} onLoanClick={loanModal.openModal} onReturnClick={returnModal.openModal} onRetireClick={retireModal.openModal} />
             </div>
             <GearDetailTabs />
 
@@ -73,6 +80,13 @@ function GearDetailPage() {
                         <ReturnForm loanId={gear.activeLoanId} onCancel={returnModal.closeModal} onReturned={handleReturned} />
                     </Modal>
             )}
+
+            <Modal isOpen={retireModal.isOpen}
+                onClose={retireModal.closeModal}
+                eyebrow="Uitrusting"
+                title="Buiten dienst stellen">
+                    <RetireForm gearId={gear.id} gearName={gear.name} onCancel={retireModal.closeModal} onRetired={handleRetired} />
+                </Modal>
         </main>
     )
 }

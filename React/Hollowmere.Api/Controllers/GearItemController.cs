@@ -44,6 +44,20 @@ public class GearItemController : ControllerBase
             return BadRequest(new { message = ex.Message });
         }
     }
+
+    [HttpPost("{id}/retire")]
+    public async Task<IActionResult> Retire(int id)
+    {
+        try
+        {
+            var item = await _service.RetireAsync(id, GetMemberId());
+            return Ok(item);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+    }
     private int GetMemberId()
     {
         return int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);

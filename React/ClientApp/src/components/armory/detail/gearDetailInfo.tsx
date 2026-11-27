@@ -8,6 +8,7 @@ interface GearDetailInfoProps {
     gear: GearItem;
     onLoanClick: () => void;
     onReturnClick: () => void;
+    onRetireClick: () => void;
 }
 
 
@@ -18,7 +19,7 @@ const conditionLabels: Record<string, string> = {
     damaged: "Beschadigd",
 }
 
-function GearDetailInfo({ gear, onLoanClick, onReturnClick }: GearDetailInfoProps) {
+function GearDetailInfo({ gear, onLoanClick, onReturnClick, onRetireClick }: GearDetailInfoProps) {
     const { user } = useAuthContext();
     const isOnLoan = gear.loanedTo != null;
     const mayReturn = isOnLoan && (gear.loanedToMemberId === user?.id || user?.quartermaster === true);
@@ -45,14 +46,8 @@ function GearDetailInfo({ gear, onLoanClick, onReturnClick }: GearDetailInfoProp
                 </div>
 
                 <div className="gear-detail-fact">
-                    {/* LoanedTo is null als niemand een item heeft geleend is nu hardcoded*/}
                     <dt>Uitgeleend aan</dt>
                     <dd>{gear.loanedTo ?? "Niet uitgeleend"}</dd>
-                </div>
-
-                <div className="gear-detail-fact">
-                    <dt>Uit gebruik</dt>
-                    <dd>{gear.retired ? "Ja" : "Nee"}</dd>
                 </div>
             </dl>
 
@@ -88,8 +83,13 @@ function GearDetailInfo({ gear, onLoanClick, onReturnClick }: GearDetailInfoProp
                     </Button>
                 )}
             </div>
-
-
+            {user?.quartermaster && !gear.retired && (
+                <div className="gear-detail-danger">
+                    <Button type="button" variant="secondary" size="small" className="gear-detail-retire-button" onClick={onRetireClick}>                        
+                        Buiten dienst stellen
+                    </Button>
+                </div>
+            )}
         </section>
     )
 }
